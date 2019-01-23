@@ -198,7 +198,7 @@ lock_acquire(struct lock *lock)
 
         //(void)lock;  // suppress warning until code gets written
 
-	KASSERT(lock->owner == NULL);
+	KASSERT(!lock_do_i_hold(lock));
 	spinlock_acquire(&lock->spin);
 	while(lock->held){
 		wchan_lock(lock->wc);
@@ -206,7 +206,9 @@ lock_acquire(struct lock *lock)
 		wchan_sleep(lock->wc);
 		spinlock_acquire(&lock->spin);
 	}
+	lock->held = true;
 	lock->owner = curthread;
+	spinlock_release(&lock->spin);
 
 }
 
@@ -234,14 +236,14 @@ lock_do_i_hold(struct lock *lock)
         //(void)lock;  // suppress warning until code gets written
 
 	//return true;
-	if(lock->owner == curthread){
+//	if(lock->owner == curthread){
 
-        	//return (lock != NULL && lock->owner == curthread); // dummy until code gets written
-		return true;
-	}
-	else {
-		return false;
-	}
+        	return (lock != NULL && lock->owner == curthread);
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
 }
 
 ////////////////////////////////////////////////////////////
