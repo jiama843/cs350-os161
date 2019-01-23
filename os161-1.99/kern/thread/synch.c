@@ -116,7 +116,7 @@ P(struct semaphore *sem)
 		 * strict ordering. Too bad. :-)
 		 *
 		 * Exercise: how would you implement strict FIFO
-		 * ordering?
+		 * ordering
 		 */
 		wchan_lock(sem->sem_wchan);
 		spinlock_release(&sem->sem_lock);
@@ -164,7 +164,16 @@ lock_create(const char *name)
         }
         
         // add stuff here as needed
-        
+	lock->wc = wchan_create(lock->lk_name);
+        if (lock->wc == NULL) {
+                kfree(lock->lk_name);
+                kfree(lock);
+                return NULL;
+        }
+
+        spinlock_init(&lock->spin);       
+ 	lock->held = false;
+
         return lock;
 }
 
@@ -175,6 +184,9 @@ lock_destroy(struct lock *lock)
 
         // add stuff here as needed
         
+        /* wchan_cleanup will assert if anyone's waiting on it */
+        spinlock_cleanup(&lock->spin);
+        wchan_destroy(lock->wc); 
         kfree(lock->lk_name);
         kfree(lock);
 }
@@ -184,7 +196,18 @@ lock_acquire(struct lock *lock)
 {
         // Write this
 
-        (void)lock;  // suppress warning until code gets written
+        //(void)lock;  // suppress warning until code gets written
+
+	KASSERT(lock->owner == NULL);
+	spinlock_acquire(&lock->spin);
+	while(lock->held){
+		wchan_lock(lock->wc);
+		spinlock_release(&lock->spin);
+		wchan_sleep(lock->wc);
+		spinlock_acquire(&lock->spin);
+	}
+	lock->owner = curthread;
+
 }
 
 void
@@ -192,7 +215,15 @@ lock_release(struct lock *lock)
 {
         // Write this
 
-        (void)lock;  // suppress warning until code gets written
+        //(void)lock;  // suppress warning until code gets written
+
+	KASSERT(lock_do_i_hold(lock));
+	spinlock_acquire(&lock->spin);
+	lock->held = false;
+	lock->owner = NULL;
+	wchan_wakeone(lock->wc);
+	spinlock_release(&lock->spin);
+
 }
 
 bool
@@ -200,9 +231,17 @@ lock_do_i_hold(struct lock *lock)
 {
         // Write this
 
-        (void)lock;  // suppress warning until code gets written
+        //(void)lock;  // suppress warning until code gets written
 
-        return true; // dummy until code gets written
+	//return true;
+	if(lock->owner == curthread){
+
+        	//return (lock != NULL && lock->owner == curthread); // dummy until code gets written
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 ////////////////////////////////////////////////////////////
