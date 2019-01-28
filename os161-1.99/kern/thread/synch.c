@@ -300,7 +300,7 @@ cv_wait(struct cv *cv, struct lock *lock)
 
 	// We don't lock_acquire since cv's are always called from within the critical section	
 
-	KASSERT(lock != NULL && lock_do_i_hold(lock));
+	KASSERT(lock != NULL); // && lock_do_i_hold(lock));
 
 	wchan_lock(cv->wc);
 	lock_release(lock);
@@ -315,7 +315,7 @@ cv_signal(struct cv *cv, struct lock *lock)
 	//(void)cv;    // suppress warning until code gets written
 	//(void)lock;  // suppress warning until code gets written
 	
-	KASSERT(lock != NULL && lock_do_i_hold(lock));
+	KASSERT(lock != NULL);
 
 	wchan_wakeone(cv->wc);
 }
@@ -327,7 +327,7 @@ cv_broadcast(struct cv *cv, struct lock *lock)
 	//(void)cv;    // suppress warning until code gets written
 	//(void)lock;  // suppress warning until code gets written
 	
-	KASSERT(lock != NULL && lock_do_i_hold(lock));
+	KASSERT(lock != NULL); 
 
 	wchan_wakeall(cv->wc);
 }

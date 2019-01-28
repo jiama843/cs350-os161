@@ -117,15 +117,19 @@ static int get_direction(Direction origin, Direction destination){
 static void restrict_direction(Direction origin, Direction destination, int change){
   if (origin == north && destination == west){
     leftOS += change;
+    straightOE += change;
   }
   else if (origin == south && destination == east){
     leftON += change; 
+    straightOW += change;
   }
   else if (origin == east && destination == north){
     leftOW += change;
+    straightOS += change;
   }
   else if (origin == west && destination == south){
-    leftOS += change;
+    leftOE += change;
+    straightON += change;
   }
   else if (origin == north && destination == south){
     leftOS += change;
@@ -133,6 +137,7 @@ static void restrict_direction(Direction origin, Direction destination, int chan
     leftOW += change;
     straightOE += change;
     straightOW += change;
+    rightOW += change;
   }
   else if (origin == south && destination == north){
     leftON += change;
@@ -140,6 +145,7 @@ static void restrict_direction(Direction origin, Direction destination, int chan
     leftOW += change;
     straightOE += change;
     straightOW += change;
+    rightOE += change;
   }
   else if (origin == east && destination == west){
     leftON += change;
@@ -147,6 +153,7 @@ static void restrict_direction(Direction origin, Direction destination, int chan
     leftOW += change;
     straightON += change;
     straightOS += change;
+    rightON += change;
   }
   else if (origin == west && destination == east){
     leftON += change;
@@ -154,6 +161,7 @@ static void restrict_direction(Direction origin, Direction destination, int chan
     leftOE += change;
     straightON += change;
     straightOS += change;
+    rightOS += change;
   }
   else if (origin == north && destination == east){
     leftOS += change;
@@ -274,42 +282,42 @@ static void set_cv(Direction origin, Direction destination, struct lock *lk){
 }
 
 // Wake conditions
-static void wake_cvs(){
+static void wake_cvs(struct lock *lk){
   if (rightON == 0){
-    cv_broadcast(cv_rightON, lk_rightON);
+    cv_broadcast(cv_rightON, lk);
   }
   if (rightOS == 0){
-    cv_broadcast(cv_rightOS, lk_rightOS);
+    cv_broadcast(cv_rightOS, lk);
   }
   if (rightOE == 0){
-    cv_broadcast(cv_rightOE, lk_rightOE);
+    cv_broadcast(cv_rightOE, lk);
   }
   if (rightOW == 0){
-    cv_broadcast(cv_rightOW, lk_rightOW);
+    cv_broadcast(cv_rightOW, lk);
   }
   if (straightON == 0){
-    cv_broadcast(cv_straightON, lk_straightON);
+    cv_broadcast(cv_straightON, lk);
   }
   if (straightOS == 0){
-    cv_broadcast(cv_straightOS, lk_straightOS);
+    cv_broadcast(cv_straightOS, lk);
   }
   if (straightOE == 0){
-    cv_broadcast(cv_straightOE, lk_straightOE);
+    cv_broadcast(cv_straightOE, lk);
   }
   if (straightOW == 0){
-    cv_broadcast(cv_straightOW, lk_straightOW);
+    cv_broadcast(cv_straightOW, lk);
   }
   if (leftON == 0){
-    cv_broadcast(cv_leftON, lk_leftON);
+    cv_broadcast(cv_leftON, lk);
   }
   if (leftOS == 0){
-    cv_broadcast(cv_leftOS, lk_leftOS);
+    cv_broadcast(cv_leftOS, lk);
   }
   if (leftOE == 0){
-    cv_broadcast(cv_leftOE, lk_leftOE);
+    cv_broadcast(cv_leftOE, lk);
   }
   if (leftOW == 0){
-    cv_broadcast(cv_leftOW, lk_leftOW);
+    cv_broadcast(cv_leftOW, lk);
   }
 }
 
@@ -573,11 +581,11 @@ intersection_before_entry(Direction origin, Direction destination)
   //P(intersectionSem);
 
   lock_acquire(get_lock(origin, destination));
+  lock_acquire(dir_lock);
   while (get_direction(origin, destination) > 0){
-    set_cv(origin, destination, get_lock(origin, destination)); // POSSIBLE DEADLOCK/CONTEXT SWITCH
+    set_cv(origin, destination, dir_lock);//get_lock(origin, destination)); // POSSIBLE DEADLOCK/CONTEXT SWITCH
   }
   
-  lock_acquire(dir_lock);
   restrict_direction(origin, destination, 1); 
   lock_release(dir_lock);
  
@@ -607,7 +615,7 @@ intersection_after_exit(Direction origin, Direction destination)
   lock_acquire(dir_lock);
 
   restrict_direction(origin, destination, -1);
-  wake_cvs();
+  wake_cvs(dir_lock);
 
   // Unsure about these two (may cause deadlock) 
   lock_release(dir_lock);
