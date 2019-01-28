@@ -202,7 +202,7 @@ static void restrict_direction(Direction origin, Direction destination, int chan
 }
 
 // return the respective lock
-static struct lock *get_lock(Direction origin, Direction destination){
+/*static struct lock *get_lock(Direction origin, Direction destination){
   if (origin == north && destination == west){
     return lk_rightON;
   }
@@ -239,7 +239,7 @@ static struct lock *get_lock(Direction origin, Direction destination){
   else {
     return lk_leftOW;
   }
-}
+}*/
 
 // Set condition variables
 static void set_cv(Direction origin, Direction destination, struct lock *lk){
@@ -580,7 +580,7 @@ intersection_before_entry(Direction origin, Direction destination)
   //KASSERT(intersectionSem != NULL);
   //P(intersectionSem);
 
-  lock_acquire(get_lock(origin, destination));
+  //lock_acquire(get_lock(origin, destination));
   lock_acquire(dir_lock);
   while (get_direction(origin, destination) > 0){
     set_cv(origin, destination, dir_lock);//get_lock(origin, destination)); // POSSIBLE DEADLOCK/CONTEXT SWITCH
@@ -619,6 +619,6 @@ intersection_after_exit(Direction origin, Direction destination)
 
   // Unsure about these two (may cause deadlock) 
   lock_release(dir_lock);
-  lock_release(get_lock(origin, destination));
+  //lock_release(get_lock(origin, destination));
 
 }
