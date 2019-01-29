@@ -21,41 +21,14 @@
 /*
  * replace this with declarations of any synchronization and other variables you need here
  */
-//static struct semaphore *intersectionSem;
-
-// Keep locks for each direction cv
-static struct lock *lk_rightON = 0;
-static struct lock *lk_rightOS = 0;
-static struct lock *lk_rightOE = 0;
-static struct lock *lk_rightOW = 0;
-
-static struct lock *lk_straightON = 0;
-static struct lock *lk_straightOS = 0;
-static struct lock *lk_straightOE = 0;
-static struct lock *lk_straightOW = 0;
-
-static struct lock *lk_leftON = 0; 
-static struct lock *lk_leftOS = 0;
-static struct lock *lk_leftOE = 0;
-static struct lock *lk_leftOW = 0;
 
 static struct lock *dir_lock = 0; // Allows for change of direction restriction
 
-// Keep unique condition variables for each direction
-static struct cv *cv_rightON = 0;
-static struct cv *cv_rightOS = 0;
-static struct cv *cv_rightOE = 0;
-static struct cv *cv_rightOW = 0;
-
-static struct cv *cv_straightON = 0; 
-static struct cv *cv_straightOS = 0;
-static struct cv *cv_straightOE = 0;
-static struct cv *cv_straightOW = 0;
-
-static struct cv *cv_leftON = 0;    
-static struct cv *cv_leftOS = 0;
-static struct cv *cv_leftOE = 0;
-static struct cv *cv_leftOW = 0;
+// Keep unique condition variables for each destination
+static struct cv *cv_DN = 0;    
+static struct cv *cv_DS = 0;
+static struct cv *cv_DE = 0;
+static struct cv *cv_DW = 0;
 
 // Keep track of all directions that a vechicle can collide with 
 static int rightON = 0;
@@ -201,123 +174,36 @@ static void restrict_direction(Direction origin, Direction destination, int chan
   }
 }
 
-// return the respective lock
-/*static struct lock *get_lock(Direction origin, Direction destination){
-  if (origin == north && destination == west){
-    return lk_rightON;
-  }
-  else if (origin == south && destination == east){
-    return lk_rightOS;
-  }
-  else if (origin == east && destination == north){
-    return lk_rightOE;
-  }
-  else if (origin == west && destination == south){
-    return lk_rightOW;
-  }
-  else if (origin == north && destination == south){
-    return lk_straightON;
-  }
-  else if (origin == south && destination == north){
-    return lk_straightOS;
-  }
-  else if (origin == east && destination == west){
-    return lk_straightOE;
-  }
-  else if (origin == west && destination == east){
-    return lk_straightOW;
-  }
-  else if (origin == north && destination == east){
-    return lk_leftON;
-  }
-  else if (origin == south && destination == west){
-    return lk_leftOS;
-  }
-  else if (origin == east && destination == south){
-    return lk_leftOE;
-  }
-  else {
-    return lk_leftOW;
-  }
-}*/
-
 // Set condition variables
-static void set_cv(Direction origin, Direction destination, struct lock *lk){
-  if (origin == north && destination == west){
-    cv_wait(cv_rightON, lk);
+static void set_cv(Direction destination, struct lock *lk){
+  if (destination == north){
+    cv_wait(cv_DN, lk);
   }
-  else if (origin == south && destination == east){
-    cv_wait(cv_rightOS, lk);
+  else if (destination == south){
+    cv_wait(cv_DS, lk);
   }
-  else if (origin == east && destination == north){
-    cv_wait(cv_rightOE, lk);
+  else if (destination == east) {
+    cv_wait(cv_DE, lk);
   }
-  else if (origin == west && destination == south){
-    cv_wait(cv_rightOW, lk);
-  }
-  else if (origin == north && destination == south){
-    cv_wait(cv_straightON, lk);
-  }
-  else if (origin == south && destination == north){
-    cv_wait(cv_straightOS, lk);
-  }
-  else if (origin == east && destination == west){
-    cv_wait(cv_straightOE, lk);
-  }
-  else if (origin == west && destination == east){
-    cv_wait(cv_straightOW, lk);
-  }
-  else if (origin == north && destination == east){
-    cv_wait(cv_leftON, lk);
-  }
-  else if (origin == south && destination == west){
-    cv_wait(cv_leftOS, lk);
-  }
-  else if (origin == east && destination == south){
-    cv_wait(cv_leftOE, lk);
-  }
-  else {
-    cv_wait(cv_leftOW, lk);
+  else if (destination == west){
+    cv_wait(cv_DW, lk);
   }
 }
 
+
 // Wake conditions
 static void wake_cvs(struct lock *lk){
-  if (rightON == 0){
-    cv_broadcast(cv_rightON, lk);
+  if (rightOE == 0 || straightOS == 0 || leftOW == 0){
+    cv_broadcast(cv_DN, lk);
   }
-  if (rightOS == 0){
-    cv_broadcast(cv_rightOS, lk);
+  if (rightOW == 0 || straightON == 0 || leftOE == 0){
+    cv_broadcast(cv_DS, lk);
   }
-  if (rightOE == 0){
-    cv_broadcast(cv_rightOE, lk);
+  if (rightOS == 0 || straightOW == 0 || leftON == 0){
+    cv_broadcast(cv_DE, lk);
   }
-  if (rightOW == 0){
-    cv_broadcast(cv_rightOW, lk);
-  }
-  if (straightON == 0){
-    cv_broadcast(cv_straightON, lk);
-  }
-  if (straightOS == 0){
-    cv_broadcast(cv_straightOS, lk);
-  }
-  if (straightOE == 0){
-    cv_broadcast(cv_straightOE, lk);
-  }
-  if (straightOW == 0){
-    cv_broadcast(cv_straightOW, lk);
-  }
-  if (leftON == 0){
-    cv_broadcast(cv_leftON, lk);
-  }
-  if (leftOS == 0){
-    cv_broadcast(cv_leftOS, lk);
-  }
-  if (leftOE == 0){
-    cv_broadcast(cv_leftOE, lk);
-  }
-  if (leftOW == 0){
-    cv_broadcast(cv_leftOW, lk);
+  if (rightON == 0 || straightOE == 0 || leftOS == 0){
+    cv_broadcast(cv_DW, lk);
   }
 }
 
@@ -331,131 +217,24 @@ static void wake_cvs(struct lock *lk){
 void
 intersection_sync_init(void)
 {
-  /* replace this default implementation with your own implementation */
-
-  /*intersectionSem = sem_create("intersectionSem",1);
-  if (intersectionSem == NULL) {
-    panic("could not create intersection semaphore");
-  }*/
-
-  cv_rightON = cv_create("rightON");
-  if (cv_rightON == NULL) {
-    panic("could not create cv rightON");
-  } 
-
-  cv_rightOS = cv_create("rightOS");
-  if (cv_rightOS == NULL) {
-    panic("could not create cv rightOS");
+  cv_DN = cv_create("DN");
+  if (cv_DN == NULL) {
+    panic("could not create cv DN");
   }
 
-  cv_rightOE = cv_create("rightOE");
-  if (cv_rightOE == NULL) {
-    panic("could not create cv rightOE");
+  cv_DS = cv_create("DS");
+  if (cv_DS == NULL) {
+    panic("could not create cv DS");
   }
 
-  cv_rightOW = cv_create("rightOW");
-  if (cv_rightOW == NULL) {
-    panic("could not create cv rightOW");
+  cv_DE = cv_create("DE");
+  if (cv_DE == NULL) {
+    panic("could not create cv DE");
   }
 
-  cv_straightON = cv_create("straightON");
-  if (cv_straightON == NULL) {
-    panic("could not create cv straightON");
-  }
-
-  cv_straightOS = cv_create("straightOS");
-  if (cv_straightOS == NULL) {
-    panic("could not create cv straightOS");
-  }
-
-  cv_straightOE = cv_create("straightOE");
-  if (cv_straightOE == NULL) {
-    panic("could not create cv straightOE");
-  }
-
-  cv_straightOW = cv_create("straightOW");
-  if (cv_straightOW == NULL) {
-    panic("could not create cv straightOW");
-  }
- 
-  cv_leftON = cv_create("leftON");
-  if (cv_leftON == NULL) {
-    panic("could not create cv leftON");
-  }
-
-  cv_leftOS = cv_create("leftOS");
-  if (cv_leftOS == NULL) {
-    panic("could not create cv leftOS");
-  }
-
-  cv_leftOE = cv_create("leftOE");
-  if (cv_leftOE == NULL) {
-    panic("could not create cv leftOE");
-  }
-
-  cv_leftOW = cv_create("leftOW");
-  if (cv_leftOW == NULL) {
-    panic("could not create cv leftOW");
-  }
-
-  lk_rightON = lock_create("rightON");
-  if (lk_rightON == NULL) {
-    panic("could not create lk rightON");
-  }
-
-  lk_rightOS = lock_create("rightOS");
-  if (lk_rightOS == NULL) {
-    panic("could not create lk rightOS");
-  } 
-
-  lk_rightOE = lock_create("rightOE");
-  if (lk_rightOE == NULL) {
-    panic("could not create lk rightOE");
-  }
-
-  lk_rightOW = lock_create("rightOW");
-  if (lk_rightOW == NULL) {
-    panic("could not create lk rightOW");
-  }
-
-  lk_straightON = lock_create("straightON");
-  if (lk_straightON == NULL) {
-    panic("could not create lk straightON");
-  }
-
-  lk_straightOS = lock_create("straightOS");
-  if (lk_straightOS == NULL) {
-    panic("could not create lk straightOS");
-  }
-
-  lk_straightOE = lock_create("straightOE");
-  if (lk_straightOE == NULL) {
-    panic("could not create lk straightOE");
-  }
-
-  lk_straightOW = lock_create("straightOW");
-  if (lk_straightOW == NULL) {
-    panic("could not create lk straightOW");
-  }
-
-  lk_leftON = lock_create("leftON");
-  if (lk_leftON == NULL) {
-    panic("could not create lk leftON");
-  }
-
-  lk_leftOS = lock_create("leftOS");
-  if (lk_leftOS == NULL) {
-    panic("could not create lk leftOS");
-  }
-
-  lk_leftOE = lock_create("leftOE");
-  if (lk_leftOE == NULL) {
-    panic("could not create lk leftOE");
-  }
-
-  lk_leftOW = lock_create("leftOW");
-  if (lk_leftOW == NULL) {
-    panic("could not create lk leftOW");
+  cv_DW = cv_create("DW");
+  if (cv_DW == NULL) {
+    panic("could not create cv DW");
   }
 
   dir_lock = lock_create("dir_lock");
@@ -477,81 +256,17 @@ intersection_sync_init(void)
 void
 intersection_sync_cleanup(void)
 {
-  /* replace this default implementation with your own implementation */
-  /*KASSERT(intersectionSem != NULL);
-  sem_destroy(intersectionSem);*/
+  KASSERT(cv_DN != NULL);
+  cv_destroy(cv_DN);
 
-  KASSERT(cv_rightON != NULL);
-  cv_destroy(cv_rightON);
+  KASSERT(cv_DS != NULL);
+  cv_destroy(cv_DS);
 
-  KASSERT(cv_rightOS != NULL);
-  cv_destroy(cv_rightOS);
+  KASSERT(cv_DE != NULL);
+  cv_destroy(cv_DE);
 
-  KASSERT(cv_rightOE != NULL);
-  cv_destroy(cv_rightOE);
-
-  KASSERT(cv_rightOW != NULL);
-  cv_destroy(cv_rightOW);
-
-  KASSERT(cv_straightON != NULL);
-  cv_destroy(cv_straightON);
-
-  KASSERT(cv_straightOS != NULL);
-  cv_destroy(cv_straightOS);
-
-  KASSERT(cv_straightOE != NULL);
-  cv_destroy(cv_straightOE);
-
-  KASSERT(cv_straightOW != NULL);
-  cv_destroy(cv_straightOW);
-
-  KASSERT(cv_leftON != NULL);
-  cv_destroy(cv_leftON);
-
-  KASSERT(cv_leftOS != NULL);
-  cv_destroy(cv_leftOS);
-
-  KASSERT(cv_leftOE != NULL);
-  cv_destroy(cv_leftOE);
-
-  KASSERT(cv_leftOW != NULL);
-  cv_destroy(cv_leftOW);
-
-  KASSERT(lk_rightON != NULL);
-  lock_destroy(lk_rightON);
-
-  KASSERT(lk_rightOS != NULL);
-  lock_destroy(lk_rightOS);
-
-  KASSERT(lk_rightOE != NULL);
-  lock_destroy(lk_rightOE);
-
-  KASSERT(lk_rightOW != NULL);
-  lock_destroy(lk_rightOW);
-
-  KASSERT(lk_straightON != NULL);
-  lock_destroy(lk_straightON);
-
-  KASSERT(lk_straightOS != NULL);
-  lock_destroy(lk_straightOS);
-
-  KASSERT(lk_straightOE != NULL);
-  lock_destroy(lk_straightOE);
-
-  KASSERT(lk_straightOW != NULL);
-  lock_destroy(lk_straightOW);
-
-  KASSERT(lk_leftON != NULL);
-  lock_destroy(lk_leftON);
-
-  KASSERT(lk_leftOS != NULL);
-  lock_destroy(lk_leftOS);
-
-  KASSERT(lk_leftOE != NULL);
-  lock_destroy(lk_leftOE);
-
-  KASSERT(lk_leftOW != NULL);
-  lock_destroy(lk_leftOW);
+  KASSERT(cv_DW != NULL);
+  cv_destroy(cv_DW);
 
   KASSERT(dir_lock != NULL);
   lock_destroy(dir_lock);
@@ -574,21 +289,15 @@ intersection_sync_cleanup(void)
 void
 intersection_before_entry(Direction origin, Direction destination) 
 {
-  /* replace this default implementation with your own implementation */
-  //(void)origin;  /* avoid compiler complaint about unused parameter */
-  //(void)destination; /* avoid compiler complaint about unused parameter */
-  //KASSERT(intersectionSem != NULL);
-  //P(intersectionSem);
 
   //lock_acquire(get_lock(origin, destination));
   lock_acquire(dir_lock);
   while (get_direction(origin, destination) > 0){
-    set_cv(origin, destination, dir_lock);//get_lock(origin, destination)); // POSSIBLE DEADLOCK/CONTEXT SWITCH
+    set_cv(destination, dir_lock);
   }
   
   restrict_direction(origin, destination, 1); 
   lock_release(dir_lock);
- 
 }
 
 
@@ -606,19 +315,12 @@ intersection_before_entry(Direction origin, Direction destination)
 void
 intersection_after_exit(Direction origin, Direction destination) 
 {
-  /* replace this default implementation with your own implementation */
-  //(void)origin;  /* avoid compiler complaint about unused parameter */
-  //(void)destination; /* avoid compiler complaint about unused parameter */
-  //KASSERT(intersectionSem != NULL);
-  //V(intersectionSem);
 
   lock_acquire(dir_lock);
 
   restrict_direction(origin, destination, -1);
   wake_cvs(dir_lock);
 
-  // Unsure about these two (may cause deadlock) 
   lock_release(dir_lock);
-  //lock_release(get_lock(origin, destination));
 
 }
