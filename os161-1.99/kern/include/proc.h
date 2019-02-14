@@ -71,6 +71,16 @@ struct proc {
 	/* add more material here as needed */
 };
 
+/*
+* Pid structure
+*/
+#if OPT_A2
+struct pid_t {
+	int id;
+	
+};
+#endif
+
 /* This is the process structure for the kernel and for kernel-only threads. */
 extern struct proc *kproc;
 
