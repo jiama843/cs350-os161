@@ -241,6 +241,7 @@ proc_create_runprogram(const char *name)
 
 	proc = proc_create(name);
 	if (proc == NULL) {
+		panic("null process was created");
 		return NULL;
 	}
 
@@ -278,6 +279,17 @@ proc_create_runprogram(const char *name)
 	}
 	spinlock_release(&curproc->p_lock);
 #endif // UW
+
+#if OPT_A2
+	/* increment the pid count */
+	lock_acquire(pid_lock);
+	proc->pid = pid_count;
+	pid_count++;
+	lock_release(pid_lock);
+
+	pc_lock = lock_create(name);
+	pc_cv = cv_create(name);
+#endif
 
 #ifdef UW
 	/* increment the count of processes */

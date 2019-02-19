@@ -46,6 +46,13 @@ struct semaphore;
 #endif // UW
 
 /*
+* Pid structure
+*/
+#if OPT_A2
+
+#endif
+
+/*
  * Process structure.
  */
 struct proc {
@@ -59,6 +66,18 @@ struct proc {
 	/* VFS */
 	struct vnode *p_cwd;		/* current working directory */
 
+#if OPT_A2
+	pid_t pid;
+
+	int family_size = 0;
+	struct proc **family; /* list of child processes */
+
+	struct lock *pc_lock; /* Lock for parent and child */
+	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/
+	int exitcode;
+	//int exitstatus;
+#endif
+
 #ifdef UW
   /* a vnode to refer to the console device */
   /* this is a quick-and-dirty way to get console writes working */
@@ -70,16 +89,6 @@ struct proc {
 
 	/* add more material here as needed */
 };
-
-/*
-* Pid structure
-*/
-#if OPT_A2
-struct pid_t {
-	int id;
-	
-};
-#endif
 
 /* This is the process structure for the kernel and for kernel-only threads. */
 extern struct proc *kproc;
