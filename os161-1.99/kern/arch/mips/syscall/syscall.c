@@ -108,6 +108,11 @@ syscall(struct trapframe *tf)
 		err = sys___time((userptr_t)tf->tf_a0,
 				 (userptr_t)tf->tf_a1);
 		break;
+#if OPT_A2
+	case SYS_fork:
+		err = sys_fork(tf);
+		break;
+#endif
 #ifdef UW
 	case SYS_write:
 	  err = sys_write((int)tf->tf_a0,
@@ -177,7 +182,13 @@ syscall(struct trapframe *tf)
  * Thus, you can trash it and do things another way if you prefer.
  */
 void
-enter_forked_process(struct trapframe *tf)
+enter_forked_process(struct trapframe *tf, long nicememe)
 {
-	(void)tf;
+	struct trapframe stack_tf = *(struct) tf; 
+
+	tf.v0 = 0
+	tf.a3 = 0
+	tf.pc += 4
+
+	mips_usermode(&tf);
 }

@@ -69,6 +69,15 @@ static struct semaphore *proc_count_mutex;
 struct semaphore *no_proc_sem;   
 #endif  // UW
 
+/*
+* Pid assignment mechanism
+*/
+#if OPT_A2
+// Count the number of pids (to assign unique)
+static volatile unsigned int pid_count;
+// Lock the pid_count
+static struct lock *pid_lock;
+#endif
 
 
 /*
@@ -197,6 +206,14 @@ proc_bootstrap(void)
   if (kproc == NULL) {
     panic("proc_create for kproc failed\n");
   }
+
+#if OPT_A2
+	pid_count = 0;
+	pid_lock = lock_create("pid_lock");
+	if (pid_lock == NULL){
+    panic("could not create pid_lock\n");
+	}
+#endif
 #ifdef UW
   proc_count = 0;
   proc_count_mutex = sem_create("proc_count_mutex",1);
@@ -224,6 +241,7 @@ proc_create_runprogram(const char *name)
 
 	proc = proc_create(name);
 	if (proc == NULL) {
+		panic("null process was created");
 		return NULL;
 	}
 
@@ -261,6 +279,17 @@ proc_create_runprogram(const char *name)
 	}
 	spinlock_release(&curproc->p_lock);
 #endif // UW
+
+#if OPT_A2
+	/* increment the pid count */
+	lock_acquire(pid_lock);
+	proc->pid = pid_count;
+	pid_count++;
+	lock_release(pid_lock);
+
+	pc_lock = lock_create(name);
+	pc_cv = cv_create(name);
+#endif
 
 #ifdef UW
 	/* increment the count of processes */
