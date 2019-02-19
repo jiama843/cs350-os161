@@ -11,12 +11,19 @@
 #include <copyinout.h>
 
 // HELPERS
+void krealloc_family(struct proc **family, int size){
+  struct proc **new_family = kmalloc(size);
+  for(int i = 0; i < size / sizeof(*curproc); i++){
+    new_family[i] = family[i];
+  }
+}
+
 void removeChild(pid_t pid){
   for(int i = 0; i < curproc->family_size; i++){
     if(pid == curproc->family[i]->pid){
-      free(curproc->family[i]); // Could be null?
+      kfree(curproc->family[i]); // Could be null?
       curproc->family[i] = curproc->family[curproc->family_size - 1];
-      realloc(curproc->family, (curproc->family_size - 1) * sizeof(*curproc));
+      krealloc_family(curproc->family, (curproc->family_size - 1) * sizeof(*curproc));
       return;
     }
   }
@@ -68,7 +75,7 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  realloc(curproc->family, (curproc->family_size + 1) * sizeof(*curproc));
+  krealloc_family(curproc->family, (curproc->family_size + 1) * sizeof(*curproc));
   curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
   curproc->family_size++;
 
@@ -101,7 +108,7 @@ void sys__exit(int exitcode) {
 
   curproc->exitcode = exitcode;
   if(curproc->family){
-    free(curproc->family);
+    kfree(curproc->family);
   }
 
   KASSERT(curproc->p_addrspace != NULL);
