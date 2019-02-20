@@ -92,7 +92,7 @@ int sys_fork(struct trapframe *tf){
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe));
-  memcpy(tf, childtf, sizeof(struct trapframe));
+  memcpy(tf, childtf, sizeof(*tf));
 
   err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
 
