@@ -80,6 +80,9 @@ int sys_fork(struct trapframe *tf){
 
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(curproc->p_name);
+  if (p == NULL) {
+		panic("WHY NULL????");
+	}
 
   struct addrspace **dp_addr;
   err = as_copy(curproc->p_addrspace, dp_addr);

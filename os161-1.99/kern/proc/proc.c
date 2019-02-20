@@ -242,7 +242,6 @@ proc_create_runprogram(const char *name)
 
 	proc = proc_create(name);
 	if (proc == NULL) {
-		panic("null process was created");
 		return NULL;
 	}
 
