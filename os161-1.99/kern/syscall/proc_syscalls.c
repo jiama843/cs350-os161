@@ -91,8 +91,8 @@ int sys_fork(struct trapframe *tf){
 	spinlock_release(&p->p_lock);
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(*tf));
-  memcpy(tf, childtf, sizeof(*tf));
+  struct trapframe *childtf = kmalloc(sizeof(struct trapframe));
+  memcpy(tf, childtf, sizeof(struct trapframe));
 
   err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
 
@@ -183,18 +183,18 @@ sys_waitpid(pid_t pid,
 
   // We don't account for options in OS161
   if (options != 0) {
-    lock->release(&curproc->p_lock);
+    spinlock_release(&curproc->p_lock);
     return(EINVAL);
   }
   
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
-    lock->release(&curproc->p_lock);
+    spinlock_release(&curproc->p_lock);
     return(result);
   }
   
   *retval = pid;
-  lock->release(&curproc->p_lock);
+  spinlock_release(&curproc->p_lock);
   return(0);
 }
 #endif
