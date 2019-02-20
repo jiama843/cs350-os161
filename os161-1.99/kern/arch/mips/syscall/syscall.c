@@ -187,13 +187,15 @@ syscall(struct trapframe *tf)
 void
 enter_forked_process(void *_tf, unsigned long nicememe)
 {
-	struct trapframe stack_tf = *(struct trapframe) _tf; 
 
-	tf.v0 = 0
-	tf.a3 = 0
-	tf.pc += 4
+	(void) nicememe;
+	struct trapframe stack_tf = *(struct) _tf; 
 
-	mips_usermode(&tf);
-	kfree(tf);
+	stack_tf.v0 = 0;
+	stack_tf.a3 = 0;
+	stack_tf.pc += 4;
+
+	mips_usermode(&stack_tf);
+	kfree(stack_tf);
 }
 #endif
