@@ -47,13 +47,6 @@ struct semaphore;
 #endif // UW
 
 /*
-* Pid structure
-*/
-#if OPT_A2
-
-#endif
-
-/*
  * Process structure.
  */
 struct proc {

@@ -289,8 +289,8 @@ proc_create_runprogram(const char *name)
 	pid_count++;
 	lock_release(pid_lock);
 
-	pc_lock = lock_create(name);
-	pc_cv = cv_create(name);
+	proc->pc_lock = lock_create(name);
+	proc->pc_cv = cv_create(name);
 #endif
 
 #ifdef UW
