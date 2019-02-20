@@ -284,6 +284,7 @@ proc_create_runprogram(const char *name)
 #if OPT_A2
 	/* increment the pid count */
 	lock_acquire(pid_lock);
+	proc->family_size = 0;
 	proc->pid = pid_count;
 	pid_count++;
 	lock_release(pid_lock);

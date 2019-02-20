@@ -70,7 +70,7 @@ struct proc {
 #if OPT_A2
 	pid_t pid;
 
-	int family_size = 0;
+	int family_size;
 	struct proc **family; /* list of child processes */
 
 	struct lock *pc_lock; /* Lock for parent and child */
