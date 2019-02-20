@@ -16,7 +16,7 @@
 // HELPERS
 #if OPT_A2
 static void krealloc_family(struct proc **family, size_t size, size_t currSize){
-  struct proc **new_family = kmalloc(size * sizeof(*curproc));
+  struct proc **new_family = kmalloc(size * sizeof(struct proc));
   if(currSize < size){
     for(size_t i = 0; i < currSize; i++){ // Copy over all existing elements (before nullspace)
       new_family[i] = family[i];
