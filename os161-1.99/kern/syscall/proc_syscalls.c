@@ -16,8 +16,8 @@
 // HELPERS
 #if OPT_A2
 static void krealloc_family(struct proc **family, size_t size){
-  struct proc **new_family = kmalloc(size);
-  for(size_t i = 0; i < size / sizeof(*curproc); i++){
+  struct proc **new_family = kmalloc(size * sizeof(*curproc));
+  for(size_t i = 0; i < size; i++){
     new_family[i] = family[i];
   }
 }
@@ -27,7 +27,7 @@ static void removeChild(pid_t pid){
     if(pid == curproc->family[i]->pid){
       kfree(curproc->family[i]); // Could be null?
       curproc->family[i] = curproc->family[curproc->family_size - 1];
-      krealloc_family(curproc->family, (curproc->family_size - 1) * sizeof(*curproc));
+      krealloc_family(curproc->family, curproc->family_size - 1);
       return;
     }
   }
@@ -85,7 +85,7 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  krealloc_family(curproc->family, (curproc->family_size + 1) * sizeof(*curproc));
+  krealloc_family(curproc->family, curproc->family_size + 1);
   curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
   curproc->family_size++;
 
