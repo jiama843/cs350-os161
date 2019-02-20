@@ -99,7 +99,7 @@ int sys_fork(struct trapframe *tf){
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
-  err = thread_fork(curproc->p_name, curproc, enter_forked_process, &childtf, 1);
+  err = thread_fork(curproc->p_name, curproc, enter_forked_process, (void *) childtf, 1);
 
   return 0;
 }
@@ -177,11 +177,11 @@ sys_waitpid(pid_t pid,
   */
   lock_acquire(curproc->pc_lock);
   while(!hasExited(pid)){
-    cv_wait(curproc->pc_cv);
+    cv_wait(curproc->pc_cv, curproc->pc_lock);
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = MKWAIT_EXIT(curproc->family[getChildIndex(pid)]->exitcode);
+  exitstatus = _MKWAIT_EXIT(curproc->family[getChildIndex(pid)]->exitcode);
 
   // Remove the process from family array
   removeChild(pid);
