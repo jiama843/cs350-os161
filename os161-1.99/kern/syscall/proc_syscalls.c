@@ -3,6 +3,8 @@
 #include <kern/unistd.h>
 #include <kern/wait.h>
 #include <lib.h>
+#include <synch.h>
+#include <wait.h>
 #include <syscall.h>
 #include <current.h>
 #include <proc.h>
@@ -14,9 +16,9 @@
 
 // HELPERS
 #if OPT_A2
-static void krealloc_family(struct proc **family, int size){
+static void krealloc_family(struct proc **family, size_t size){
   struct proc **new_family = kmalloc(size);
-  for(int i = 0; i < size / sizeof(*curproc); i++){
+  for(size_t i = 0; i < size / sizeof(*curproc); i++){
     new_family[i] = family[i];
   }
 }
@@ -71,11 +73,14 @@ int sys_fork(struct trapframe *tf){
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(curproc->p_name);
 
-  err = as_copy(curproc->p_addrspace, new_addr);
+  struct addrspace **dp_addr;
+  err = as_copy(curproc->p_addrspace, dp_addr);
   if(err == ENOMEM){
     return ENOMEM;
     panic("Memory error");
   }
+
+  new_addr = *dp_addr;
 
   // !!! Make sure that this spinlock encompasses enough
   spinlock_acquire(&p->p_lock);
@@ -91,10 +96,10 @@ int sys_fork(struct trapframe *tf){
 	spinlock_release(&p->p_lock);
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(struct trapframe));
+  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
-  err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
+  err = thread_fork(curproc->p_name, curproc, enter_forked_process, &childtf, 1);
 
   return 0;
 }
@@ -170,7 +175,7 @@ sys_waitpid(pid_t pid,
 
   /* Need to explore macro further for cv
   */
-  lock_acquire(curproc->p_lock);
+  lock_acquire(curproc->pc_lock);
   while(!hasExited(pid)){
     cv_wait(curproc->pc_cv);
   }
@@ -183,18 +188,18 @@ sys_waitpid(pid_t pid,
 
   // We don't account for options in OS161
   if (options != 0) {
-    spinlock_release(&curproc->p_lock);
+    lock_release(curproc->pc_lock);
     return(EINVAL);
   }
   
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
-    spinlock_release(&curproc->p_lock);
+    lock_release(curproc->pc_lock);
     return(result);
   }
   
   *retval = pid;
-  spinlock_release(&curproc->p_lock);
+  lock_release(curproc->pc_lock);
   return(0);
 }
 #endif
