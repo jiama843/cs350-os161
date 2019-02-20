@@ -94,8 +94,8 @@ int sys_fork(struct trapframe *tf){
 	p->p_addrspace = new_addr;
 
   krealloc_family(curproc->family, curproc->family_size + 1, curproc->family_size);
-  curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
   curproc->family_size++;
+  curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
 
   p->family_size = curproc->family_size;
   p->family = curproc->family; /* family is global */
