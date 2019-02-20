@@ -9,8 +9,10 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include "opt-A2.h"
 
 // HELPERS
+#if OPT_A2
 void krealloc_family(struct proc **family, int size){
   struct proc **new_family = kmalloc(size);
   for(int i = 0; i < size / sizeof(*curproc); i++){
@@ -46,7 +48,7 @@ bool hasExited(pid_t pid){
   }
   return false;
 }
-
+#endif
 
 // POTENTIAL ISSUES:
 /* Pretty sure MKWAIT doesn't take in process as argument (nor an exit status is sufficient)
@@ -56,6 +58,7 @@ bool hasExited(pid_t pid){
 *  -> May need to check spinlock placement again
 */
 
+#if OPT_A2
 int sys_fork(struct trapframe *tf){
 
   int err;
@@ -137,7 +140,6 @@ void sys__exit(int exitcode) {
 }
 
 
-/* stub handler for getpid() system call                */
 int
 sys_getpid(pid_t *retval)
 {
@@ -192,3 +194,4 @@ sys_waitpid(pid_t pid,
   lock->release(curproc->p_lock);
   return(0);
 }
+#endif
