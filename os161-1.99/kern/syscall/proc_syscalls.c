@@ -18,7 +18,7 @@
 static void krealloc_family(struct proc **family, size_t size){
   struct proc **new_family = kmalloc(size * sizeof(*curproc));
   for(size_t i = 0; i < size; i++){
-    if(family[i]){
+    if(family[i] != NULL){
       new_family[i] = family[i];
     }
   }
