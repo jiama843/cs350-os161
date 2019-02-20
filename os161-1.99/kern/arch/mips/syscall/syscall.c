@@ -190,7 +190,7 @@ enter_forked_process(void *_tf, unsigned long nicememe)
 
 	//(void)nicememe;
 	nicememe = 0;
-	struct trapframe stack_tf = *(struct trapframe) _tf; 
+	struct trapframe stack_tf = (struct trapframe) _tf; 
 
 	stack_tf.tf_v0 = 0;
 	stack_tf.tf_a3 = 0;
