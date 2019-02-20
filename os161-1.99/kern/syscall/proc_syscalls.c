@@ -76,16 +76,17 @@ int sys_fork(struct trapframe *tf){
 
   int err;
 
+  struct proc *proc = curproc;
   struct addrspace *new_addr;
 
   //Can NAMES BE THE SAME???? assume same name as parent
-  struct proc *p = proc_create_runprogram(curproc->p_name);
+  struct proc *p = proc_create_runprogram(proc->p_name);
   if (p == NULL) {
 		panic("WHY NULL????");
 	}
 
   struct addrspace **dp_addr;
-  err = as_copy(curproc->p_addrspace, dp_addr);
+  err = as_copy(proc->p_addrspace, dp_addr);
   if(err == ENOMEM){
     return ENOMEM;
     panic("Memory error");
@@ -97,16 +98,16 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  krealloc_family(curproc->family, curproc->family_size + 1, curproc->family_size);
-  curproc->family_size++;
+  krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
+  proc->family_size++;
 
-  int family_size = curproc->family_size;
+  int family_size = proc->family_size;
   (void)family_size;
 
-  curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
+  proc->family[proc->family_size - 1] = p; // Add child process p to "family"
 
-  p->family_size = curproc->family_size;
-  p->family = curproc->family; /* family is global */
+  p->family_size = proc->family_size;
+  p->family = proc->family; /* family is global */
 
 	spinlock_release(&p->p_lock);
 
@@ -114,7 +115,7 @@ int sys_fork(struct trapframe *tf){
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
-  err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
+  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
 
   return 0;
 }
@@ -188,33 +189,35 @@ sys_waitpid(pid_t pid,
   int exitstatus;
   int result;
 
+  struct proc *proc = curproc;
+
   /* Need to explore macro further for cv
   */
-  lock_acquire(curproc->pc_lock);
+  lock_acquire(proc->pc_lock);
   while(!hasExited(pid)){
-    cv_wait(curproc->pc_cv, curproc->pc_lock);
+    cv_wait(proc->pc_cv, proc->pc_lock);
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = _MKWAIT_EXIT(curproc->family[getChildIndex(pid)]->exitcode);
+  exitstatus = _MKWAIT_EXIT(proc->family[getChildIndex(pid)]->exitcode);
 
   // Remove the process from family array
   removeChild(pid);
 
   // We don't account for options in OS161
   if (options != 0) {
-    lock_release(curproc->pc_lock);
+    lock_release(proc->pc_lock);
     return(EINVAL);
   }
   
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
-    lock_release(curproc->pc_lock);
+    lock_release(proc->pc_lock);
     return(result);
   }
   
   *retval = pid;
-  lock_release(curproc->pc_lock);
+  lock_release(proc->pc_lock);
   return(0);
 }
 #endif
