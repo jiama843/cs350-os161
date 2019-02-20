@@ -188,12 +188,12 @@ void
 enter_forked_process(void *_tf, unsigned long nicememe)
 {
 
-	(void) nicememe;
-	struct trapframe stack_tf = (struct trapframe) _tf; 
+	(void)nicememe;
+	struct trapframe stack_tf = (struct trapframe) *_tf; 
 
-	stack_tf.v0 = 0;
-	stack_tf.a3 = 0;
-	stack_tf.pc += 4;
+	stack_tf.tf_v0 = 0;
+	stack_tf.tf_a3 = 0;
+	stack_tf.tf_pc += 4;
 
 	mips_usermode(&stack_tf);
 	kfree(stack_tf);
