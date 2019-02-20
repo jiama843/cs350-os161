@@ -27,6 +27,7 @@ static void krealloc_family(struct proc **family, size_t size, size_t currSize){
       new_family[i] = family[i];
     }
   }
+  family = new_family;
 }
 
 static void removeChild(pid_t pid){
