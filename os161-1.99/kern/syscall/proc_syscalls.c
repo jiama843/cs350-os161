@@ -4,7 +4,6 @@
 #include <kern/wait.h>
 #include <lib.h>
 #include <synch.h>
-#include <wait.h>
 #include <syscall.h>
 #include <current.h>
 #include <proc.h>
