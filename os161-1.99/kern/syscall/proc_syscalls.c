@@ -27,6 +27,7 @@ static void krealloc_family(struct proc **family, size_t size, size_t currSize){
       new_family[i] = family[i];
     }
   }
+  //possibly kfree family
   family = new_family;
 }
 
@@ -96,6 +97,8 @@ int sys_fork(struct trapframe *tf){
   krealloc_family(curproc->family, curproc->family_size + 1, curproc->family_size);
   curproc->family_size++;
   curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
+
+  kprintf("%d", curproc->family_size - 1);
 
   p->family_size = curproc->family_size;
   p->family = curproc->family; /* family is global */
