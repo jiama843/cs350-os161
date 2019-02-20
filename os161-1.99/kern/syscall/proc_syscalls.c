@@ -98,7 +98,7 @@ int sys_fork(struct trapframe *tf){
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
-  err = thread_fork(curproc->p_name, curproc, enter_forked_process, (void *) childtf, (unsigned long) 1);
+  err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
 
   return 0;
 }
