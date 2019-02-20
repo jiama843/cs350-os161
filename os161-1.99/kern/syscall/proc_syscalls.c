@@ -9,6 +9,7 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include <trapframe.h>
 #include "opt-A2.h"
 
 // HELPERS

@@ -61,7 +61,7 @@ int sys_reboot(int code);
 int sys___time(userptr_t user_seconds, userptr_t user_nanoseconds);
 
 #if OPT_A2
-int sys_fork();
+int sys_fork(struct trapframe *tf);
 #endif
 
 #ifdef UW
