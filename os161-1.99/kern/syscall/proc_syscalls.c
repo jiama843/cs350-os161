@@ -13,14 +13,14 @@
 
 // HELPERS
 #if OPT_A2
-void krealloc_family(struct proc **family, int size){
+static void krealloc_family(struct proc **family, int size){
   struct proc **new_family = kmalloc(size);
   for(int i = 0; i < size / sizeof(*curproc); i++){
     new_family[i] = family[i];
   }
 }
 
-void removeChild(pid_t pid){
+static void removeChild(pid_t pid){
   for(int i = 0; i < curproc->family_size; i++){
     if(pid == curproc->family[i]->pid){
       kfree(curproc->family[i]); // Could be null?
@@ -31,7 +31,7 @@ void removeChild(pid_t pid){
   }
 }
 
-int getChildIndex(pid_t pid){
+static int getChildIndex(pid_t pid){
   for(int i = 0; i < curproc->family_size; i++){
     if(pid == curproc->family[i]->pid){
       return i;
@@ -40,9 +40,9 @@ int getChildIndex(pid_t pid){
   return -1;
 }
 
-bool hasExited(pid_t pid){
+static bool hasExited(pid_t pid){
   for(int i = 0; i < curproc->family_size; i++){
-    if(pid == curproc->family[i]->pid && curproc->family[i]->exit_status){ // Verify that exit status exists
+    if(pid == curproc->family[i]->pid && curproc->family[i]->exitcode){ // Verify that exit status exists
       return true;
     }
   }
@@ -56,6 +56,8 @@ bool hasExited(pid_t pid){
 * sys_fork() -> May need to copy lock to child process
 *  -> May need to handle ENPROC and EMPROC
 *  -> May need to check spinlock placement again
+*
+* proc.c -> might need to acquire spinlock in proc_create_runprogram
 */
 
 #if OPT_A2
@@ -88,8 +90,8 @@ int sys_fork(struct trapframe *tf){
 	spinlock_release(&p->p_lock);
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(struct trapframe));
-  memcpy(tf, childtf, sizeof *tf);
+  struct trapframe *childtf = kmalloc(sizeof(*tf));
+  memcpy(tf, childtf, sizeof(*tf));
 
   err = thread_fork(curproc->p_name, curproc, enter_forked_process, childtf, 1);
 
@@ -180,18 +182,18 @@ sys_waitpid(pid_t pid,
 
   // We don't account for options in OS161
   if (options != 0) {
-    lock->release(curproc->p_lock);
+    lock->release(&curproc->p_lock);
     return(EINVAL);
   }
   
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
-    lock->release(curproc->p_lock);
+    lock->release(&curproc->p_lock);
     return(result);
   }
   
   *retval = pid;
-  lock->release(curproc->p_lock);
+  lock->release(&curproc->p_lock);
   return(0);
 }
 #endif
