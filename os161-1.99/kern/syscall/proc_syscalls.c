@@ -95,6 +95,7 @@ int sys_fork(struct trapframe *tf){
 
   krealloc_family(curproc->family, curproc->family_size + 1, curproc->family_size);
   curproc->family_size++;
+  int size_rn = curproc->family_size;
   curproc->family[curproc->family_size - 1] = p; // Add child process p to "family"
 
   p->family_size = curproc->family_size;
