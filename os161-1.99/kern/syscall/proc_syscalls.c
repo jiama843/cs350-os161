@@ -16,7 +16,7 @@
 // HELPERS
 #if OPT_A2
 static void krealloc_family(struct proc **family, size_t size, size_t currSize){
-  struct proc **new_family = kmalloc(size * sizeof(struct proc));
+  struct proc **new_family = kmalloc(size * sizeof(struct proc *));
   if(currSize < size){
     for(size_t i = 0; i < currSize; i++){ // Copy over all existing elements (before nullspace)
       new_family[i] = family[i];
@@ -100,9 +100,6 @@ int sys_fork(struct trapframe *tf){
 
   krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
   proc->family_size++;
-
-  int family_size = proc->family_size;
-  (void)family_size;
 
   proc->family[proc->family_size - 1] = p; // Add child process p to "family"
 
