@@ -185,9 +185,9 @@ syscall(struct trapframe *tf)
 
 #if OPT_A2
 void
-enter_forked_process(void *tf, unsigned long nicememe)
+enter_forked_process(void *_tf, unsigned long nicememe)
 {
-	struct trapframe stack_tf = *(struct) tf; 
+	struct trapframe stack_tf = *(struct trapframe) _tf; 
 
 	tf.v0 = 0
 	tf.a3 = 0
