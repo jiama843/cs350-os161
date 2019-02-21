@@ -84,6 +84,8 @@ int sys_fork(struct trapframe *tf){
   struct proc *proc = curproc;
   struct addrspace *new_addr;
 
+  spinlock_acquire(&p->p_lock);
+
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
   if (p == NULL) {
@@ -100,26 +102,22 @@ int sys_fork(struct trapframe *tf){
   new_addr = *dp_addr;
 
   // !!! Make sure that this spinlock encompasses enough
-  spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  //krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
   err = array_add(proc->family, p, NULL);
-  //proc->family_size++;
+  if(err != NULL){
+    panic("ExCuSe Me WtHeck");
+  }
 
-  //proc->family[proc->family_size - 1] = kmalloc(sizeof(struct proc *));
-  //proc->family[proc->family_size - 1] = (struct proc_info) { p->pid, p->exitcode}; // Add child process p to "family"
-
-  //p->family_size = proc->family_size;
-  //p->family = proc->family; /* family is global */
-
-	spinlock_release(&p->p_lock);
+  p->family = proc->family;
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
   err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
+
+  spinlock_release(&p->p_lock);
 
   return 0;
 }
