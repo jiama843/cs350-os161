@@ -84,7 +84,7 @@ int sys_fork(struct trapframe *tf){
   struct proc *proc = curproc;
   struct addrspace *new_addr;
 
-  spinlock_acquire(&p->p_lock);
+  spinlock_acquire(&proc->p_lock);
 
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
@@ -105,7 +105,7 @@ int sys_fork(struct trapframe *tf){
 	p->p_addrspace = new_addr;
 
   err = array_add(proc->family, p, NULL);
-  if(err != NULL){
+  if(err){
     panic("ExCuSe Me WtHeck");
   }
 
@@ -117,7 +117,7 @@ int sys_fork(struct trapframe *tf){
 
   err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
 
-  spinlock_release(&p->p_lock);
+  spinlock_release(&proc->p_lock);
 
   return 0;
 }
