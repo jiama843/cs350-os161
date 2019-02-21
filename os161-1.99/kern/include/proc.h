@@ -46,6 +46,13 @@ struct vnode;
 struct semaphore;
 #endif // UW
 
+#if OPT_A2
+struct proc_info {
+	pid_t pid;
+	int exitcode;
+};
+#endif
+
 /*
  * Process structure.
  */
@@ -65,7 +72,7 @@ struct proc {
 
 	int family_size;
 	//struct proc **family; /* list of child processes */
-	struct proc *family;
+	struct proc_info *family; // Keep track of proc_info for child processes
 
 	struct lock *pc_lock; /* Lock for parent and child */
 	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/

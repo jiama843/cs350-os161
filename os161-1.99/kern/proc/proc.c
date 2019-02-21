@@ -209,7 +209,7 @@ proc_bootstrap(void)
   }
 
 #if OPT_A2
-	pid_count = 0;
+	pid_count = 1;
 	pid_lock = lock_create("pid_lock");
 	if (pid_lock == NULL){
     panic("could not create pid_lock\n");

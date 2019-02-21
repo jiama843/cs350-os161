@@ -15,9 +15,9 @@
 
 // HELPERS
 #if OPT_A2
-static void krealloc_family(struct proc *family, size_t size, size_t currSize){
+static void krealloc_family(struct proc_info *family, size_t size, size_t currSize){
   //struct proc **new_family = kmalloc(size * sizeof(struct proc *));
-  struct proc *new_family = kmalloc(size * sizeof(struct proc));
+  struct proc_info *new_family = kmalloc(size * sizeof(struct proc_info));
   if(currSize < size){
     for(size_t i = 0; i < currSize; i++){ // Copy over all existing elements (before nullspace)
       new_family[i] = family[i];
@@ -103,10 +103,10 @@ int sys_fork(struct trapframe *tf){
   proc->family_size++;
 
   //proc->family[proc->family_size - 1] = kmalloc(sizeof(struct proc *));
-  proc->family[proc->family_size - 1] = *p; // Add child process p to "family"
+  proc->family[proc->family_size - 1] = {p->pid, p->exitcode}; // Add child process p to "family"
 
-  p->family_size = proc->family_size;
-  p->family = proc->family; /* family is global */
+  //p->family_size = proc->family_size;
+  //p->family = proc->family; /* family is global */
 
 	spinlock_release(&p->p_lock);
 
@@ -132,12 +132,12 @@ void sys__exit(int exitcode) {
 
   DEBUG(DB_SYSCALL,"Syscall: _exit(%d)\n",exitcode);
 
-  curproc->exitcode = exitcode;
-  if(curproc->family){
-    kfree(curproc->family);
+  p->exitcode = exitcode;
+  if(p->family){
+    kfree(p->family);
   }
 
-  KASSERT(curproc->p_addrspace != NULL);
+  KASSERT(p->p_addrspace != NULL);
   as_deactivate();
   /*
    * clear p_addrspace before calling as_destroy. Otherwise if
