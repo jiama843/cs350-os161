@@ -84,10 +84,14 @@ int sys_fork(struct trapframe *tf){
   struct proc *proc = curproc;
   struct addrspace *new_addr;
 
-  spinlock_acquire(&proc->p_lock);
+  //spinlock_acquire(&proc->p_lock);
 
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
+
+  // Make sure no p isn't modified until it is created
+  spinlock_acquire(&p->p_lock);
+
   if (p == NULL) {
 		panic("WHY NULL????");
 	}
@@ -111,13 +115,15 @@ int sys_fork(struct trapframe *tf){
 
   p->family = proc->family;
 
+  spinlock_release(&p->p_lock);
+
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
   err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
 
-  spinlock_release(&proc->p_lock);
+  //spinlock_release(&proc->p_lock);
 
   return 0;
 }
