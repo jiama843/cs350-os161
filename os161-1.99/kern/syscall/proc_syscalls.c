@@ -103,7 +103,7 @@ int sys_fork(struct trapframe *tf){
   proc->family_size++;
 
   //proc->family[proc->family_size - 1] = kmalloc(sizeof(struct proc *));
-  proc->family[proc->family_size - 1] = {p->pid, p->exitcode}; // Add child process p to "family"
+  proc->family[proc->family_size - 1] = { .pid = p->pid, .exitcode = p->exitcode}; // Add child process p to "family"
 
   //p->family_size = proc->family_size;
   //p->family = proc->family; /* family is global */
