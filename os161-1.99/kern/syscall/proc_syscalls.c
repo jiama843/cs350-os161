@@ -90,7 +90,7 @@ int sys_fork(struct trapframe *tf){
   struct proc *p = proc_create_runprogram(proc->p_name);
 
   // Make sure no p isn't modified until it is created
-  spinlock_acquire(&p->p_lock);
+  //spinlock_acquire(&p->p_lock);
 
   if (p == NULL) {
 		panic("WHY NULL????");
@@ -115,7 +115,11 @@ int sys_fork(struct trapframe *tf){
 
   p->family = proc->family;
 
-  spinlock_release(&p->p_lock);
+  // Possibly need to free on create
+  p->pc_lock = proc->pc_lock;
+  p->pc_cv = proc->pc_cv;
+
+  //spinlock_release(&p->p_lock);
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
