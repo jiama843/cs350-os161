@@ -15,8 +15,9 @@
 
 // HELPERS
 #if OPT_A2
-static void krealloc_family(struct proc **family, size_t size, size_t currSize){
-  struct proc **new_family = kmalloc(size * sizeof(struct proc *));
+static void krealloc_family(struct proc *family, size_t size, size_t currSize){
+  //struct proc **new_family = kmalloc(size * sizeof(struct proc *));
+  struct proc *new_family = kmalloc(size * sizeof(struct proc));
   if(currSize < size){
     for(size_t i = 0; i < currSize; i++){ // Copy over all existing elements (before nullspace)
       new_family[i] = family[i];
@@ -98,22 +99,22 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
-  memcpy(tf, childtf, sizeof(*tf));
-
-  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
-
   krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
   proc->family_size++;
 
   //proc->family[proc->family_size - 1] = kmalloc(sizeof(struct proc *));
-  proc->family[proc->family_size - 1] = p; // Add child process p to "family"
+  proc->family[proc->family_size - 1] = *p; // Add child process p to "family"
 
   p->family_size = proc->family_size;
   p->family = proc->family; /* family is global */
 
 	spinlock_release(&p->p_lock);
+
+  // Make a copy of tf in the heap and pass it into enter_forked_process
+  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
+  memcpy(tf, childtf, sizeof(*tf));
+
+  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
 
   return 0;
 }

@@ -64,7 +64,8 @@ struct proc {
 	pid_t pid;
 
 	int family_size;
-	struct proc **family; /* list of child processes */
+	//struct proc **family; /* list of child processes */
+	struct proc *family;
 
 	struct lock *pc_lock; /* Lock for parent and child */
 	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/
