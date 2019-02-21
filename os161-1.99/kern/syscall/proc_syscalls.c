@@ -34,8 +34,8 @@
 }*/
 
 static void removeChild(pid_t pid){
-  for(int i = 0; i < curproc->family->num; i++){
-    if(pid == array_get(curproc->family, i)->pid){
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
       //kfree(curproc->family[i]); // Could be null?
       //curproc->family[i] = curproc->family[curproc->family_size - 1];
       //krealloc_family(curproc->family, curproc->family_size - 1, curproc->family_size);
@@ -47,8 +47,8 @@ static void removeChild(pid_t pid){
 }
 
 static int getChildIndex(pid_t pid){
-  for(int i = 0; i < curproc->family->num; i++){
-    if(pid == array_get(curproc->family, i)->pid){
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
       return i;
     }
   }
@@ -56,8 +56,9 @@ static int getChildIndex(pid_t pid){
 }
 
 static bool hasExited(pid_t pid){
-  for(int i = 0; i < curproc->family->num; i++){
-    if(pid == array_get(curproc->family, i)->pid && array_get(curproc->family, i)->exitcode){ // Verify that exit status exists
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid && 
+        ((struct proc *) array_get(curproc->family, i))->exitcode){ // Verify that exit status exists
       return true;
     }
   }
@@ -202,7 +203,7 @@ sys_waitpid(pid_t pid,
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = _MKWAIT_EXIT(array_get(proc->family, getChildIndex(pid))->exitcode);
+  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, getChildIndex(pid)))->exitcode);
 
   // Remove the process from family array
   removeChild(pid);
