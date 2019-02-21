@@ -70,9 +70,9 @@ struct proc {
 #if OPT_A2
 	pid_t pid;
 
-	int family_size;
+	//int family_size;
 	//struct proc **family; /* list of child processes */
-	struct proc_info *family; // Keep track of proc_info for child processes
+	struct array *family; // Keep track of proc_info for child processes
 
 	struct lock *pc_lock; /* Lock for parent and child */
 	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/

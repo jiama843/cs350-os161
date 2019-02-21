@@ -1,4 +1,5 @@
 #include <types.h>
+#include <array.h>
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
@@ -15,7 +16,7 @@
 
 // HELPERS
 #if OPT_A2
-static void krealloc_family(struct proc_info *family, size_t size, size_t currSize){
+/*static void krealloc_family(struct proc_info *family, size_t size, size_t currSize){
   //struct proc **new_family = kmalloc(size * sizeof(struct proc *));
   struct proc_info *new_family = kmalloc(size * sizeof(struct proc_info));
   if(currSize < size){
@@ -30,22 +31,24 @@ static void krealloc_family(struct proc_info *family, size_t size, size_t currSi
   }
   //possibly kfree family
   family = new_family;
-}
+}*/
 
 static void removeChild(pid_t pid){
-  for(int i = 0; i < curproc->family_size; i++){
-    if(pid == curproc->family[i].pid){
+  for(int i = 0; i < curproc->family->num; i++){
+    if(pid == array_get(curproc->family, i)->pid){
       //kfree(curproc->family[i]); // Could be null?
-      curproc->family[i] = curproc->family[curproc->family_size - 1];
-      krealloc_family(curproc->family, curproc->family_size - 1, curproc->family_size);
+      //curproc->family[i] = curproc->family[curproc->family_size - 1];
+      //krealloc_family(curproc->family, curproc->family_size - 1, curproc->family_size);
+      array_remove(curproc->family, i);
+
       return;
     }
   }
 }
 
 static int getChildIndex(pid_t pid){
-  for(int i = 0; i < curproc->family_size; i++){
-    if(pid == curproc->family[i].pid){
+  for(int i = 0; i < curproc->family->num; i++){
+    if(pid == array_get(curproc->family, i)->pid){
       return i;
     }
   }
@@ -53,8 +56,8 @@ static int getChildIndex(pid_t pid){
 }
 
 static bool hasExited(pid_t pid){
-  for(int i = 0; i < curproc->family_size; i++){
-    if(pid == curproc->family[i].pid && curproc->family[i].exitcode){ // Verify that exit status exists
+  for(int i = 0; i < curproc->family->num; i++){
+    if(pid == array_get(curproc->family, i)->pid && array_get(curproc->family, i)->exitcode){ // Verify that exit status exists
       return true;
     }
   }
@@ -99,11 +102,12 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
-  krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
-  proc->family_size++;
+  //krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
+  err = array_add(proc->family, p, NULL);
+  //proc->family_size++;
 
   //proc->family[proc->family_size - 1] = kmalloc(sizeof(struct proc *));
-  proc->family[proc->family_size - 1] = (struct proc_info) { p->pid, p->exitcode}; // Add child process p to "family"
+  //proc->family[proc->family_size - 1] = (struct proc_info) { p->pid, p->exitcode}; // Add child process p to "family"
 
   //p->family_size = proc->family_size;
   //p->family = proc->family; /* family is global */
@@ -198,7 +202,7 @@ sys_waitpid(pid_t pid,
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = _MKWAIT_EXIT(proc->family[getChildIndex(pid)].exitcode);
+  exitstatus = _MKWAIT_EXIT(array_get(proc->family, getChildIndex(pid))->exitcode);
 
   // Remove the process from family array
   removeChild(pid);
