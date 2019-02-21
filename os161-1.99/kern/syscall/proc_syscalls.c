@@ -118,11 +118,14 @@ int sys_fork(struct trapframe *tf){
   spinlock_release(&p->p_lock);
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
+  struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
   memcpy(tf, childtf, sizeof(*tf));
 
-  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
+  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, 1);
 
+  if(err){
+    panic("threadfork err lul");
+  }
   //spinlock_release(&proc->p_lock);
 
   return 0;
