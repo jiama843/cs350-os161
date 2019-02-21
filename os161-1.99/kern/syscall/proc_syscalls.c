@@ -98,6 +98,12 @@ int sys_fork(struct trapframe *tf){
   spinlock_acquire(&p->p_lock);
 	p->p_addrspace = new_addr;
 
+  // Make a copy of tf in the heap and pass it into enter_forked_process
+  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
+  memcpy(tf, childtf, sizeof(*tf));
+
+  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
+
   krealloc_family(proc->family, proc->family_size + 1, proc->family_size);
   proc->family_size++;
 
@@ -108,12 +114,6 @@ int sys_fork(struct trapframe *tf){
   p->family = proc->family; /* family is global */
 
 	spinlock_release(&p->p_lock);
-
-  // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(struct trapframe)); // Why differ?
-  memcpy(tf, childtf, sizeof(*tf));
-
-  err = thread_fork(proc->p_name, proc, enter_forked_process, childtf, 1);
 
   return 0;
 }
