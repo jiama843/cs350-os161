@@ -89,8 +89,7 @@ int sys_fork(struct trapframe *tf){
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
 
-  // Make sure no p isn't modified until it is created
-  spinlock_acquire(&p->p_lock);
+
 
   if (p == NULL) {
 		panic("WHY NULL????");
@@ -107,19 +106,6 @@ int sys_fork(struct trapframe *tf){
 
 	p->p_addrspace = new_addr;
 
-  err = array_add(proc->family, p, NULL);
-  if(err){
-    panic("ExCuSe Me WtHeck");
-  }
-
-  p->family = proc->family;
-
-  // Possibly need to free on create
-  p->pc_lock = proc->pc_lock;
-  p->pc_cv = proc->pc_cv;
-
-
-
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
   memcpy(childtf, tf, sizeof(*tf));
@@ -129,10 +115,24 @@ int sys_fork(struct trapframe *tf){
   if(err){
     panic("threadfork err lul");
   } 
-  
+
+  err = array_add(proc->family, p, NULL);
+  if(err){
+    panic("ExCuSe Me WtHeck");
+  }
+
+  // Make sure no p isn't modified until it is created
+  spinlock_acquire(&p->p_lock);
+
+  p->family = proc->family;
+
+  // Possibly need to free on create
+  p->pc_lock = proc->pc_lock;
+  p->pc_cv = proc->pc_cv;
+
   // !!! Make sure that this spinlock encompasses enough
   spinlock_release(&p->p_lock);
-  
+
   //spinlock_release(&proc->p_lock);
 
   return 0;
