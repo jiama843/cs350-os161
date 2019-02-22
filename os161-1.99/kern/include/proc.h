@@ -46,13 +46,6 @@ struct vnode;
 struct semaphore;
 #endif // UW
 
-#if OPT_A2
-struct proc_info {
-	pid_t pid;
-	int exitcode;
-};
-#endif
-
 /*
  * Process structure.
  */
