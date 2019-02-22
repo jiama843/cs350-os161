@@ -93,7 +93,9 @@ int sys_fork(struct trapframe *tf){
 		panic("WHY NULL????");
 	}
 
+  spinlock_acquire(&proc->p_lock);
   spinlock_acquire(&p->p_lock);
+
   struct addrspace **dp_addr;
   err = as_copy(proc->p_addrspace, dp_addr);
   if(err == ENOMEM){
@@ -103,6 +105,8 @@ int sys_fork(struct trapframe *tf){
 
   new_addr = *dp_addr;
 	p->p_addrspace = new_addr;
+  
+  spinlock_release(&proc->p_lock);
   spinlock_release(&p->p_lock);
 
   //spinlock_acquire(&proc->p_lock);
