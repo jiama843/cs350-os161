@@ -196,7 +196,7 @@ enter_forked_process(void *_tf, unsigned long nicememe)
 	stack_tf.tf_a3 = 0;
 	stack_tf.tf_epc += 4;
 
-	mips_usermode(&stack_tf);
+	mips_usermode(_tf);
 	//kfree(_tf);
 }
 #endif
