@@ -89,8 +89,6 @@ int sys_fork(struct trapframe *tf){
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
 
-
-
   if (p == NULL) {
 		panic("WHY NULL????");
 	}
@@ -103,15 +101,14 @@ int sys_fork(struct trapframe *tf){
   }
 
   new_addr = *dp_addr;
-
 	p->p_addrspace = new_addr;
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
-  memcpy(childtf, tf, sizeof(*tf));
+  //memcpy(childtf, tf, sizeof(*tf));
+  *childtf = *tf;
 
   err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
-
   if(err){
     panic("threadfork err lul");
   } 
