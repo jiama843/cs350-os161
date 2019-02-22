@@ -121,6 +121,10 @@ int sys_fork(struct trapframe *tf){
     panic("ExCuSe Me WtHeck");
   }
 
+  // May consider adding all of the below to _exit()
+
+/*
+
   // Make sure no p isn't modified until it is created
   spinlock_acquire(&p->p_lock);
 
@@ -134,6 +138,8 @@ int sys_fork(struct trapframe *tf){
   spinlock_release(&p->p_lock);
 
   //spinlock_release(&proc->p_lock);
+
+*/
 
   return 0;
 }
