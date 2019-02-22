@@ -77,14 +77,12 @@ static bool hasExited(pid_t pid){
 */
 
 #if OPT_A2
-int sys_fork(struct trapframe *tf){
+int sys_fork(struct trapframe *tf, pid_t *retval){
 
   int err;
 
   struct proc *proc = curproc;
   struct addrspace *new_addr;
-
-  //spinlock_acquire(&proc->p_lock);
 
   //Can NAMES BE THE SAME???? assume same name as parent
   struct proc *p = proc_create_runprogram(proc->p_name);
@@ -109,7 +107,6 @@ int sys_fork(struct trapframe *tf){
   spinlock_release(&proc->p_lock);
   spinlock_release(&p->p_lock);
 
-  //spinlock_acquire(&proc->p_lock);
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
   //memcpy(childtf, tf, sizeof(*tf));
@@ -118,10 +115,10 @@ int sys_fork(struct trapframe *tf){
   err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
   if(err){
     panic("threadfork err lul");
-  } 
-  
-  //spinlock_release(&proc->p_lock);
+  }
 
+  retval = &p->pid;
+  
   err = array_add(proc->family, p, NULL);
   if(err){
     panic("ExCuSe Me WtHeck");
