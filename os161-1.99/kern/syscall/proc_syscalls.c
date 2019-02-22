@@ -105,7 +105,6 @@ int sys_fork(struct trapframe *tf){
 
   new_addr = *dp_addr;
 
-  // !!! Make sure that this spinlock encompasses enough
 	p->p_addrspace = new_addr;
 
   err = array_add(proc->family, p, NULL);
@@ -119,17 +118,21 @@ int sys_fork(struct trapframe *tf){
   p->pc_lock = proc->pc_lock;
   p->pc_cv = proc->pc_cv;
 
-  spinlock_release(&p->p_lock);
+
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
   memcpy(childtf, tf, sizeof(*tf));
 
-  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, 1);
+  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
 
   if(err){
     panic("threadfork err lul");
-  }
+  } 
+  
+  // !!! Make sure that this spinlock encompasses enough
+  spinlock_release(&p->p_lock);
+  
   //spinlock_release(&proc->p_lock);
 
   return 0;
