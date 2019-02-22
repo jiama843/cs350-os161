@@ -103,7 +103,7 @@ int sys_fork(struct trapframe *tf){
 
   new_addr = *dp_addr;
 	p->p_addrspace = new_addr;
-  spinlock_acquire(&proc->p_lock)
+  spinlock_acquire(&proc->p_lock);
 
   //spinlock_acquire(&proc->p_lock);
   // Make a copy of tf in the heap and pass it into enter_forked_process
