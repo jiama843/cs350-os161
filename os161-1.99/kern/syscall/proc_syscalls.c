@@ -105,15 +105,15 @@ int sys_fork(struct trapframe *tf){
 
   new_addr = *dp_addr;
 	p->p_addrspace = new_addr;
-  
+
   spinlock_release(&proc->p_lock);
   spinlock_release(&p->p_lock);
 
   //spinlock_acquire(&proc->p_lock);
   // Make a copy of tf in the heap and pass it into enter_forked_process
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
-  memcpy(childtf, tf, sizeof(*tf));
-
+  //memcpy(childtf, tf, sizeof(*tf));
+  *childtf = *tf;
 
   err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
   if(err){
