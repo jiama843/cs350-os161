@@ -125,7 +125,7 @@ int sys_fork(struct trapframe *tf){
   struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
   memcpy(childtf, tf, sizeof(*tf));
 
-  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
+  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, 1);
 
   if(err){
     panic("threadfork err lul");
