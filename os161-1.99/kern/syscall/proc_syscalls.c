@@ -137,7 +137,6 @@ void sys__exit(int exitcode) {
     kill_family(p->family);
     array_destroy(p->family);
     cv_broadcast(p->pc_cv, p->pc_lock);
-    proc_destroy(p);
   }
   else{
     cv_broadcast(p->pc_cv, p->pc_lock);
