@@ -255,6 +255,7 @@ proc_create_runprogram(const char *name)
 	lock_release(pid_lock);
 
 	proc->exited = false;
+	proc->has_parent = false;
 	
 	proc->pc_lock = lock_create(name);
 	if(proc->pc_lock == NULL){

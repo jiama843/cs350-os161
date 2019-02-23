@@ -70,6 +70,7 @@ struct proc {
 	struct lock *pc_lock; /* Lock for parent and child */
 	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/
 
+	volatile bool has_parent; // Keep track of whether or not a process has a parent
 	volatile bool exited; // Keep track of whether process has exited
 	volatile int exitcode; // Keep track of exitcode
 #endif

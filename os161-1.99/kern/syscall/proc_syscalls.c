@@ -14,11 +14,16 @@
 #include "opt-A2.h"
 
 #if OPT_A2
+
+// Also handle setting hasParent to false
 static void kill_family(struct array *family){
   while(family->num > 0){
     struct proc *child = (struct proc *) array_get(family, 0);
     if(child->exited){
       proc_destroy(child);
+    }
+    else{
+      child->has_parent = false;
     }
     array_remove(family, 0);
   }
@@ -99,6 +104,7 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   p->pc_lock = proc->pc_lock;
   p->pc_cv = proc->pc_cv;
   p->parent = proc;
+  p->has_parent = true;
 
 
   // Return PID
@@ -162,7 +168,8 @@ void sys__exit(int exitcode) {
      will wake up the kernel menu thread */
 
   // Don't destroy child processes (to be done in parent by wait_pid)
-  if(!p->parent){
+  //USE a bool called has_parent
+  if(!p->has_parent){
     proc_destroy(p);
   }
   
