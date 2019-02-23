@@ -50,6 +50,7 @@
 #include <vfs.h>
 #include <synch.h>
 #include <kern/fcntl.h>  
+#include "opt-A2.h"
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
@@ -69,6 +70,15 @@ static struct semaphore *proc_count_mutex;
 struct semaphore *no_proc_sem;   
 #endif  // UW
 
+/*
+* Pid assignment mechanism
+*/
+#if OPT_A2
+// Count the number of pids (to assign unique)
+static volatile unsigned int pid_count;
+// Lock the pid_count
+static struct lock *pid_lock;
+#endif
 
 
 /*
@@ -197,6 +207,14 @@ proc_bootstrap(void)
   if (kproc == NULL) {
     panic("proc_create for kproc failed\n");
   }
+
+#if OPT_A2
+	pid_count = 2;
+	pid_lock = lock_create("pid_lock");
+	if (pid_lock == NULL){
+    panic("could not create pid_lock\n");
+	}
+#endif
 #ifdef UW
   proc_count = 0;
   proc_count_mutex = sem_create("proc_count_mutex",1);
@@ -226,6 +244,28 @@ proc_create_runprogram(const char *name)
 	if (proc == NULL) {
 		return NULL;
 	}
+
+#if OPT_A2
+	/* increment the pid count */
+	proc->family = array_create();
+
+	lock_acquire(pid_lock);
+	proc->pid = pid_count;
+	pid_count++;
+	lock_release(pid_lock);
+
+	proc->exited = false;
+	
+	proc->pc_lock = lock_create(name);
+	if(proc->pc_lock == NULL){
+		panic("Panic pc_lock");
+	}
+
+	proc->pc_cv = cv_create(name);
+	if(proc->pc_cv == NULL){
+		panic("Panic pc_cv");
+	}
+#endif
 
 #ifdef UW
 	/* open the console - this should always succeed */

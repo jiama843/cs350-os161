@@ -2,6 +2,7 @@
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
+#include <mips/trapframe.h>
 #include <lib.h>
 #include <syscall.h>
 #include <current.h>
@@ -9,6 +10,90 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include "opt-A2.h"
+
+#if OPT_A2
+static void removeChild(pid_t pid){
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
+      array_remove(curproc->family, i);
+      return;
+    }
+  }
+}
+
+static int getChildIndex(pid_t pid){
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
+      return i;
+    }
+  }
+  return -1;
+}
+
+static bool hasExited(pid_t pid){
+  for(unsigned i = 0; i < curproc->family->num; i++){
+    if(pid == ((struct proc *) array_get(curproc->family, i))->pid && 
+        ((struct proc *) array_get(curproc->family, i))->exitcode){ // Verify that exit status exists
+      return true;
+    }
+  }
+  return false;
+}
+
+int sys_fork(struct trapframe *tf, pid_t *retval){
+
+  int err;
+
+  struct proc *proc = curproc;
+  struct addrspace *new_addr;
+
+  // Create child process
+  struct proc *p = proc_create_runprogram(proc->p_name);
+  if (p == NULL) {
+    return ENOMEM;
+	}
+
+
+  // Create addrspace copy and add to child
+  spinlock_acquire(&proc->p_lock);
+  struct addrspace **dp_addr;
+
+  err = as_copy(proc->p_addrspace, dp_addr);
+  if(err){
+    return err;
+  }
+
+  new_addr = *dp_addr;
+	p->p_addrspace = new_addr;
+  spinlock_release(&proc->p_lock);
+
+
+  // Make a copy of tf in the heap and pass it into enter_forked_process
+  struct trapframe *childtf = kmalloc(sizeof(*tf));
+  //memcpy(childtf, tf, sizeof(*tf));
+  *childtf = *tf;
+
+  err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
+  if(err){
+    return err;
+  }
+
+
+  // Return PID
+  *retval = p->pid;
+
+
+  // Add process to family
+  err = array_add(proc->family, p, NULL);
+  if(err){
+    return err;
+  }
+
+  return 0;
+}
+#endif
+
 
   /* this implementation of sys__exit does not do anything with the exit code */
   /* this needs to be fixed to get exit() and waitpid() working properly */
@@ -55,7 +140,12 @@ sys_getpid(pid_t *retval)
 {
   /* for now, this is just a stub that always returns a PID of 1 */
   /* you need to fix this to make it work properly */
+  #if OPT_A2
+  *retval = curproc->pid;
+  #else
   *retval = 1;
+  #endif
+
   return(0);
 }
 

@@ -39,6 +39,8 @@
 #include <spinlock.h>
 #include <thread.h> /* required for struct threadarray */
 
+#include "opt-A2.h"
+
 struct addrspace;
 struct vnode;
 #ifdef UW
@@ -58,6 +60,19 @@ struct proc {
 
 	/* VFS */
 	struct vnode *p_cwd;		/* current working directory */
+
+#if OPT_A2
+	volatile pid_t pid;
+
+	struct array *family; // Keep track of proc_info for child processes
+
+	struct proc *parent; // Keep track of parent
+	struct lock *pc_lock; /* Lock for parent and child */
+	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/
+
+	volatile bool exited; // Keep track of whether process has exited
+	volatile int exitcode; // Keep track of exitcode
+#endif
 
 #ifdef UW
   /* a vnode to refer to the console device */
