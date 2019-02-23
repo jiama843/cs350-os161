@@ -131,6 +131,7 @@ void sys__exit(int exitcode) {
 
   // Set exit code for process
   p->exitcode = exitcode;
+  p->exited = true;
 
   if(p->family->num > 0){
     nullParents(p->family);
@@ -140,7 +141,6 @@ void sys__exit(int exitcode) {
     proc_destroy(p);
   }
   else{
-    p->exited = true;
     cv_broadcast(p->pc_cv, p->pc_lock);
   }
 
