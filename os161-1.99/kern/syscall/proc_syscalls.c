@@ -15,7 +15,11 @@
 
 #if OPT_A2
 static void kill_family(struct array *family){
+  struct proc *child = (struct proc *) array_get(family, i);
   while(family->num > 0){
+    if(child->exited){
+      proc_destroy(child);
+    }
     array_remove(family, 0);
   }
 }
@@ -24,7 +28,7 @@ static void removeChild(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
     struct proc *child = (struct proc *) array_get(family, i);
     if(pid == child->pid){
-      proc_destroy((struct proc *) array_get(family, i));
+      proc_destroy(child);
       array_remove(family, i);
       return;
     }
@@ -157,8 +161,11 @@ void sys__exit(int exitcode) {
 
   /* if this is the last user process in the system, proc_destroy()
      will wake up the kernel menu thread */
-  // We need to account for the last thread in the system
-  //proc_destroy(p);
+
+  // Don't destroy child processes (to be done in parent by wait_pid)
+  if(!p->parent){
+    proc_destroy(p);
+  }
   
   thread_exit();
   /* thread_exit() does not return, so we should never get here */
