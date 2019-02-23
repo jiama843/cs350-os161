@@ -29,6 +29,7 @@ static void nullParents(struct array *family){
 static void removeChild(struct array *family, pid_t pid){
   for(unsigned i = 0; i < family->num; i++){
     if(pid == ((struct proc *) array_get(family, i))->pid){
+      proc_destroy((struct proc *) array_get(family, i));
       array_remove(family, i);
       return;
     }
@@ -131,11 +132,12 @@ void sys__exit(int exitcode) {
   // Set exit code for process
   p->exitcode = exitcode;
 
-  if(!p->parent){
+  if(p->family){
     nullParents(p->family);
     kill_family(p->family);
     array_destroy(p->family);
-    kfree(p);
+    cv_broadcast(p->pc_cv, p->pc_lock);
+    proc_destroy(p);
   }
   else{
     cv_broadcast(p->pc_cv, p->pc_lock);
