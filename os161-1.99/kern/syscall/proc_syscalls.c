@@ -29,7 +29,7 @@ static void kill_family(struct array *family){
   }
 }
 
-static void removeChild(struct array *family, pid_t pid){
+/*static void removeChild(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
     struct proc *child = (struct proc *) array_get(family, i);
     if(pid == child->pid){
@@ -38,7 +38,7 @@ static void removeChild(struct array *family, pid_t pid){
       return;
     }
   }
-}
+}*/
 
 static int getChildIndex(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
@@ -231,8 +231,9 @@ sys_waitpid(pid_t pid,
   /* Once we know that the child process has exited, we get the exit_status */
   exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, child_index))->exitcode);
 
-  // Remove the process from family array
-  removeChild(proc->family, pid);
+  // Remove the process from family array 
+  // (might not need if memory restrictions are nice)
+  //removeChild(proc->family, pid);
 
   if (options != 0) {
     lock_release(proc->pc_lock);
