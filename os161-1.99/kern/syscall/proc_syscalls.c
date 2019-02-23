@@ -132,7 +132,7 @@ void sys__exit(int exitcode) {
   // Set exit code for process
   p->exitcode = exitcode;
 
-  if(p->family){
+  if(p->family->num > 0){
     nullParents(p->family);
     kill_family(p->family);
     array_destroy(p->family);
@@ -140,9 +140,9 @@ void sys__exit(int exitcode) {
     proc_destroy(p);
   }
   else{
+    p->exited = true;
     cv_broadcast(p->pc_cv, p->pc_lock);
   }
-  p->exited = true;
 
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
