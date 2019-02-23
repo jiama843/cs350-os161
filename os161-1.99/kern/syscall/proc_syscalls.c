@@ -200,6 +200,12 @@ sys_waitpid(pid_t pid,
 
   struct proc *proc = curproc;
 
+  // Check if child process even exists otherwise return
+  int child_index = getChildIndex(proc->family, pid);
+  if(child_index == -1){
+    return -1;
+  }
+
   /* Wait on children if they haven't exited */
   lock_acquire(proc->pc_lock);
   if(!hasExited(proc->family, pid)){
@@ -207,7 +213,7 @@ sys_waitpid(pid_t pid,
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, getChildIndex(proc->family, pid)))->exitcode);
+  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, child_index))->exitcode);
 
   // Remove the process from family array
   removeChild(proc->family, pid);
