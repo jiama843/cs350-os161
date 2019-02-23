@@ -16,22 +16,6 @@
 
 // HELPERS
 #if OPT_A2
-/*static void krealloc_family(struct proc_info *family, size_t size, size_t currSize){
-  //struct proc **new_family = kmalloc(size * sizeof(struct proc *));
-  struct proc_info *new_family = kmalloc(size * sizeof(struct proc_info));
-  if(currSize < size){
-    for(size_t i = 0; i < currSize; i++){ // Copy over all existing elements (before nullspace)
-      new_family[i] = family[i];
-    }
-  }
-  else{
-    for(size_t i = 0; i < currSize - 1; i++){ // Copy over all existing elements (before nullspace)
-      new_family[i] = family[i];
-    }
-  }
-  //possibly kfree family
-  family = new_family;
-}*/
 
 static void removeChild(pid_t pid){
   for(unsigned i = 0; i < curproc->family->num; i++){
@@ -84,44 +68,46 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   struct proc *proc = curproc;
   struct addrspace *new_addr;
 
-  //Can NAMES BE THE SAME???? assume same name as parent
+  // Create child process
   struct proc *p = proc_create_runprogram(proc->p_name);
-
   if (p == NULL) {
-		panic("WHY NULL????");
+    return ENOMEM;
 	}
 
-  spinlock_acquire(&proc->p_lock);
-  //spinlock_acquire(&p->p_lock);
 
+  // Create addrspace copy and add to child
+  spinlock_acquire(&proc->p_lock);
   struct addrspace **dp_addr;
+
   err = as_copy(proc->p_addrspace, dp_addr);
-  if(err == ENOMEM){
-    return ENOMEM;
-    panic("Memory error");
+  if(err){
+    return err;
   }
 
   new_addr = *dp_addr;
 	p->p_addrspace = new_addr;
-
   spinlock_release(&proc->p_lock);
-  //spinlock_release(&p->p_lock);
+
 
   // Make a copy of tf in the heap and pass it into enter_forked_process
-  struct trapframe *childtf = kmalloc(sizeof(*tf)); // Why differ?
+  struct trapframe *childtf = kmalloc(sizeof(*tf));
   //memcpy(childtf, tf, sizeof(*tf));
   *childtf = *tf;
 
   err = thread_fork(proc->p_name, p, enter_forked_process, childtf, sizeof(*tf));
   if(err){
-    panic("threadfork err lul");
+    return err;
   }
 
-  retval = &p->pid;
-  
+
+  // Return PID
+  *retval = p->pid;
+
+
+  // Add process to family
   err = array_add(proc->family, p, NULL);
   if(err){
-    panic("ExCuSe Me WtHeck");
+    return err;
   }
 
   // May consider adding all of the below to _exit()

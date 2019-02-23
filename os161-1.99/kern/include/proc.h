@@ -61,15 +61,18 @@ struct proc {
 	struct vnode *p_cwd;		/* current working directory */
 
 #if OPT_A2
-	pid_t pid;
+	volatile pid_t pid;
 
 	//int family_size;
 	//struct proc **family; /* list of child processes */
 	struct array *family; // Keep track of proc_info for child processes
 
+	struct proc *parent; // Keep track of parent
 	struct lock *pc_lock; /* Lock for parent and child */
 	struct cv *pc_cv; /*cv for parent and child (Use macros WIFEXITED() etc. )*/
-	int exitcode;
+
+	volatile bool exited; // Keep track of whether process has exited
+	volatile int exitcode; // Keep track of exitcode
 	//int exitstatus;
 #endif
 

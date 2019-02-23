@@ -209,7 +209,7 @@ proc_bootstrap(void)
   }
 
 #if OPT_A2
-	pid_count = 1;
+	pid_count = 2;
 	pid_lock = lock_create("pid_lock");
 	if (pid_lock == NULL){
     panic("could not create pid_lock\n");
@@ -282,7 +282,6 @@ proc_create_runprogram(const char *name)
 
 #if OPT_A2
 	/* increment the pid count */
-	//proc->family_size = 0;
 	proc->family = array_create();
 
 	lock_acquire(pid_lock);
@@ -290,8 +289,17 @@ proc_create_runprogram(const char *name)
 	pid_count++;
 	lock_release(pid_lock);
 
+	proc->exited = false;
+	
 	proc->pc_lock = lock_create(name);
+	if(proc->pc_lock == NULL){
+		panic("Panic pc_lock");
+	}
+
 	proc->pc_cv = cv_create(name);
+	if(proc->pc_cv == NULL){
+		panic("Panic pc_cv");
+	}
 #endif
 
 #ifdef UW

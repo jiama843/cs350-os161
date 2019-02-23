@@ -185,18 +185,17 @@ syscall(struct trapframe *tf)
 
 #if OPT_A2
 void
-enter_forked_process(void *_tf, unsigned long nicememe)
+enter_forked_process(void *tf, unsigned long length)
 {
 
-	//(void)nicememe;
-	nicememe = 0;
-	struct trapframe stack_tf = *(struct trapframe *) _tf; 
+	length = 0;
+	struct trapframe stack_tf = *(struct trapframe *) tf; 
+	kfree(tf);
 
 	stack_tf.tf_v0 = 0;
 	stack_tf.tf_a3 = 0;
 	stack_tf.tf_epc += 4;
 
 	mips_usermode(&stack_tf);
-	//kfree(_tf);
 }
 #endif
