@@ -22,8 +22,8 @@ static void kill_family(struct array *family){
 
 static void removeChild(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
-    pid_t target = ((struct proc *) array_get(family, i))->pid;
-    if(pid == target){
+    struct proc *child = (struct proc *) array_get(family, i);
+    if(pid == child->pid){
       proc_destroy((struct proc *) array_get(family, i));
       array_remove(family, i);
       return;
@@ -33,8 +33,8 @@ static void removeChild(struct array *family, pid_t pid){
 
 static int getChildIndex(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
-    pid_t target = ((struct proc *) array_get(family, i))->pid;
-    if(pid == target){
+    struct proc *child = (struct proc *) array_get(family, i);
+    if(pid == child->pid){
       return i;
     }
   }
@@ -43,8 +43,8 @@ static int getChildIndex(struct array *family, pid_t pid){
 
 static bool hasExited(struct array *family, pid_t pid){
   for(unsigned i = 0; i < array_num(family); ++i){
-    pid_t target = ((struct proc *) array_get(family, i))->pid;
-    if(pid == target && ((struct proc *) array_get(family, i))->exited){ // Verify that exit status exists
+    struct proc *child = (struct proc *) array_get(family, i);
+    if(pid == child->pid && child->exited){ // Verify that exit status exists
       return true;
     }
   }
