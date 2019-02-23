@@ -4,6 +4,7 @@
 #include <kern/wait.h>
 #include <mips/trapframe.h>
 #include <lib.h>
+#include <synch.h>
 #include <syscall.h>
 #include <current.h>
 #include <proc.h>
@@ -14,7 +15,9 @@
 
 #if OPT_A2
 static void kill_family(struct array *family){
-
+  while(family->num > 0){
+    array_remove(family, 0);
+  }
 }
 
 static void nullParents(struct array *family){
@@ -95,7 +98,7 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   p->pc_lock = proc->pc_lock;
   p->pc_cv = proc->pc_cv;
   p->parent = proc;
-  p->
+
 
   // Return PID
   *retval = p->pid;
@@ -135,7 +138,7 @@ void sys__exit(int exitcode) {
     kfree(p);
   }
   else{
-    cv_broadcast(p->pc_cv);
+    cv_broadcast(p->pc_cv, p->pc_lock);
   }
   p->exited = true;
 
@@ -209,7 +212,7 @@ sys_waitpid(pid_t pid,
   }
 
   /* Once we know that the child process has exited, we get the exit_status */
-  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, getChildIndex(pid)))->exitcode);
+  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, getChildIndex(proc->family, pid)))->exitcode);
 
   // Remove the process from family array
   removeChild(proc->family, pid);
