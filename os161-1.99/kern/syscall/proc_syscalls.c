@@ -20,12 +20,6 @@ static void kill_family(struct array *family){
   }
 }
 
-static void nullParents(struct array *family){
-  for(unsigned i = 0; i < family->num; i++){
-    ((struct proc *) array_get(family, i))->parent = NULL;
-  }
-}
-
 static void removeChild(struct array *family, pid_t pid){
   for(unsigned i = 0; i < family->num; i++){
     if(pid == ((struct proc *) array_get(family, i))->pid){
@@ -134,7 +128,6 @@ void sys__exit(int exitcode) {
   p->exited = true;
 
   if(p->family->num > 0){
-    nullParents(p->family);
     kill_family(p->family);
     array_destroy(p->family);
     cv_broadcast(p->pc_cv, p->pc_lock);
@@ -209,7 +202,7 @@ sys_waitpid(pid_t pid,
 
   /* Wait on children if they haven't exited */
   lock_acquire(proc->pc_lock);
-  while(!hasExited(proc->family, pid)){
+  if(!hasExited(proc->family, pid)){
     cv_wait(proc->pc_cv, proc->pc_lock);
   }
 
