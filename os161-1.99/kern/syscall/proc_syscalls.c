@@ -224,7 +224,7 @@ sys_waitpid(pid_t pid,
 
   /* Wait on children if they haven't exited */
   lock_acquire(proc->pc_lock);
-  while(!hasExited(proc->family, pid)){
+  if(!hasExited(proc->family, pid)){
     cv_wait(proc->pc_cv, proc->pc_lock);
   }
 
