@@ -13,7 +13,7 @@
 #include "opt-A2.h"
 
 #if OPT_A2
-static void removeChild(pid_t pid){
+/*static void removeChild(pid_t pid){
   for(unsigned i = 0; i < curproc->family->num; i++){
     if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
       array_remove(curproc->family, i);
@@ -39,7 +39,7 @@ static bool hasExited(pid_t pid){
     }
   }
   return false;
-}
+}*/
 
 int sys_fork(struct trapframe *tf, pid_t *retval){
 
