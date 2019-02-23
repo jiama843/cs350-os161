@@ -57,15 +57,15 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
 
   // Create addrspace copy and add to child
   spinlock_acquire(&proc->p_lock);
-  struct addrspace **dp_addr;
+  //struct addrspace **dp_addr;
 
-  err = as_copy(proc->p_addrspace, dp_addr);
+  err = as_copy(proc->p_addrspace, &p->p_addrspace);//dp_addr);
   if(err){
     return err;
   }
 
-  new_addr = *dp_addr;
-	p->p_addrspace = new_addr;
+  //new_addr = *dp_addr;
+	//p->p_addrspace = new_addr;
   spinlock_release(&proc->p_lock);
 
 
