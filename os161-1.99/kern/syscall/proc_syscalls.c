@@ -142,9 +142,9 @@ void sys__exit(int exitcode) {
   if(p->family->num > 0){
     kill_family(p->family);
     array_destroy(p->family);
-    cv_broadcast(p->pc_cv, p->pc_lock);
   }
-  else{
+  
+  if(p->has_parent){
     cv_broadcast(p->pc_cv, p->pc_lock);
   }
 
