@@ -157,7 +157,8 @@ void sys__exit(int exitcode) {
 
   /* if this is the last user process in the system, proc_destroy()
      will wake up the kernel menu thread */
-  proc_destroy(p);
+  // We need to account for the last thread in the system
+  //proc_destroy(p);
   
   thread_exit();
   /* thread_exit() does not return, so we should never get here */
