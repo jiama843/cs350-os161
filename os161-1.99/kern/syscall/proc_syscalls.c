@@ -46,7 +46,7 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   int err;
 
   struct proc *proc = curproc;
-  struct addrspace *new_addr;
+ 
 
   // Create child process
   struct proc *p = proc_create_runprogram(proc->p_name);
@@ -57,6 +57,7 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
 
   // Create addrspace copy and add to child
   spinlock_acquire(&proc->p_lock);
+  //struct addrspace *new_addr;
   //struct addrspace **dp_addr;
 
   err = as_copy(proc->p_addrspace, &p->p_addrspace);//dp_addr);
