@@ -15,8 +15,8 @@
 
 #if OPT_A2
 static void kill_family(struct array *family){
-  struct proc *child = (struct proc *) array_get(family, i);
   while(family->num > 0){
+    struct proc *child = (struct proc *) array_get(family, 0);
     if(child->exited){
       proc_destroy(child);
     }
