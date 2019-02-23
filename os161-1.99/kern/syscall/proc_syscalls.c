@@ -13,33 +13,43 @@
 #include "opt-A2.h"
 
 #if OPT_A2
-/*static void removeChild(pid_t pid){
-  for(unsigned i = 0; i < curproc->family->num; i++){
-    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
-      array_remove(curproc->family, i);
+static void kill_family(struct array *family){
+
+}
+
+static void nullParents(struct array *family){
+  for(unsigned i = 0; i < family->num; i++){
+    ((struct proc *) array_get(family, i))->parent = NULL;
+  }
+}
+
+static void removeChild(struct array *family, pid_t pid){
+  for(unsigned i = 0; i < family->num; i++){
+    if(pid == ((struct proc *) array_get(family, i))->pid){
+      array_remove(family, i);
       return;
     }
   }
 }
 
-static int getChildIndex(pid_t pid){
-  for(unsigned i = 0; i < curproc->family->num; i++){
-    if(pid == ((struct proc *) array_get(curproc->family, i))->pid){
+static int getChildIndex(struct array *family, pid_t pid){
+  for(unsigned i = 0; i < family->num; i++){
+    if(pid == ((struct proc *) array_get(family, i))->pid){
       return i;
     }
   }
   return -1;
 }
 
-static bool hasExited(pid_t pid){
-  for(unsigned i = 0; i < curproc->family->num; i++){
-    if(pid == ((struct proc *) array_get(curproc->family, i))->pid && 
-        ((struct proc *) array_get(curproc->family, i))->exitcode){ // Verify that exit status exists
+static bool hasExited(struct array *family, pid_t pid){
+  for(unsigned i = 0; i < family->num; i++){
+    if(pid == ((struct proc *) array_get(family, i))->pid && 
+        ((struct proc *) array_get(family, i))->exited){ // Verify that exit status exists
       return true;
     }
   }
   return false;
-}*/
+}
 
 int sys_fork(struct trapframe *tf, pid_t *retval){
 
@@ -81,6 +91,12 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   }
 
 
+  // Set locks, cvs and parents between family
+  p->pc_lock = proc->pc_lock;
+  p->pc_cv = proc->pc_cv;
+  p->parent = proc;
+  p->
+
   // Return PID
   *retval = p->pid;
 
@@ -99,15 +115,29 @@ int sys_fork(struct trapframe *tf, pid_t *retval){
   /* this implementation of sys__exit does not do anything with the exit code */
   /* this needs to be fixed to get exit() and waitpid() working properly */
 
+// Actual removal of child processes is done in waitpid, unless parent doesn't exist
 void sys__exit(int exitcode) {
 
   struct addrspace *as;
   struct proc *p = curproc;
   /* for now, just include this to keep the compiler from complaining about
      an unused variable */
-  (void)exitcode;
 
   DEBUG(DB_SYSCALL,"Syscall: _exit(%d)\n",exitcode);
+
+  // Set exit code for process
+  p->exitcode = exitcode;
+
+  if(!p->parent){
+    nullParents(p->family);
+    kill_family(p->family);
+    array_destroy(p->family);
+    kfree(p);
+  }
+  else{
+    cv_broadcast(p->pc_cv);
+  }
+  p->exited = true;
 
   KASSERT(curproc->p_addrspace != NULL);
   as_deactivate();
@@ -151,7 +181,7 @@ sys_getpid(pid_t *retval)
 }
 
 /* stub handler for waitpid() system call                */
-
+// Assume it can only be called from parent
 int
 sys_waitpid(pid_t pid,
 	    userptr_t status,
@@ -170,16 +200,33 @@ sys_waitpid(pid_t pid,
      Fix this!
   */
 
+  struct proc *proc = curproc;
+
+  /* Wait on children if they haven't exited */
+  lock_acquire(proc->pc_lock);
+  while(!hasExited(proc->family, pid)){
+    cv_wait(proc->pc_cv, proc->pc_lock);
+  }
+
+  /* Once we know that the child process has exited, we get the exit_status */
+  exitstatus = _MKWAIT_EXIT(((struct proc *) array_get(proc->family, getChildIndex(pid)))->exitcode);
+
+  // Remove the process from family array
+  removeChild(proc->family, pid);
+
   if (options != 0) {
+    lock_release(proc->pc_lock);
     return(EINVAL);
   }
-  /* for now, just pretend the exitstatus is 0 */
-  exitstatus = 0;
+
   result = copyout((void *)&exitstatus,status,sizeof(int));
   if (result) {
+    lock_release(proc->pc_lock);
     return(result);
   }
+
   *retval = pid;
+  lock_release(proc->pc_lock);
   return(0);
 }
 
