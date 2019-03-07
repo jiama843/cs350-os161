@@ -34,3 +34,4 @@ cp /u/cs350/sys161/sys161.conf sys161.conf
 cd $HOME/cs350-os161/cs350-os161/root
 sys161 kernel-ASSTX
 ```
+
