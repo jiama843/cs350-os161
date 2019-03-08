@@ -110,8 +110,8 @@ syscall(struct trapframe *tf)
 		break;
 #if OPT_A2
 	case SYS_execv:
-		err = sys_execv((userptr_t)->tf_a0,
-				(userptr_t)->tf_a1);
+		err = sys_execv((userptr_t)tf->tf_a0,
+				(userptr_t)tf->tf_a1);
 		break;
 	case SYS_fork:
 		err = sys_fork(tf, (pid_t *) &retval);
