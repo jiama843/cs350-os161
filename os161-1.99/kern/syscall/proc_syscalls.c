@@ -263,7 +263,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 	int result;
 
 	/* Open the file. */
-	result = vfs_open(progname, O_RDONLY, 0, &v);
+	result = vfs_open((char *) progname, O_RDONLY, 0, &v);
 	if (result) {
 		return result;
 	}
