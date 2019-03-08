@@ -12,6 +12,7 @@
 #include <addrspace.h>
 #include <copyinout.h>
 #include <vfs.h>
+#include <fcntl.h>
 #include "opt-A2.h"
 
 #if OPT_A2
@@ -254,7 +255,7 @@ sys_waitpid(pid_t pid,
 
 /* syscall for execv
 */
-int sys_execv(const char *program, char **args){
+int sys_execv(userptr_t progname, userptr_t args){
 
   struct addrspace *as;
 	struct vnode *v;
