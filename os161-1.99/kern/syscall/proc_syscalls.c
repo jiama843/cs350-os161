@@ -269,7 +269,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 	struct vnode *v;
 
   size_t prog_length = userptr_len((userptr_t *) progname);
-  char *prog = kmalloc(sizeof(length));
+  char *prog = kmalloc(sizeof(prog_length));
 
 	vaddr_t entrypoint, stackptr;
 	int result;
