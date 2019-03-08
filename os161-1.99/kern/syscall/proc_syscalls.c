@@ -62,7 +62,7 @@ static bool hasExited(struct array *family, pid_t pid){
   return false;
 }
 
-static size_t userptr_len(userptr *u){
+static size_t userptr_len(userptr_t *u){
 	size_t len = 0;
 	for(int i = 0; u[i] != NULL; i++){
 		len++;
@@ -302,14 +302,14 @@ int sys_execv(userptr_t progname, userptr_t args){
 	vfs_close(v);
 
 	/* Define the user stack in the address space */
-	result = as_define_stack(as, &stackptr, args, userptr_len(args));
+	result = as_define_stack(as, &stackptr, args, userptr_len((userptr_t *) args));
 	if (result) {
 		/* p_addrspace will go away when curproc is destroyed */
 		return result;
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(userptr_len(args), args, stackptr, entrypoint);
+	enter_new_process(userptr_len((userptr_t *) args), args, stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");
