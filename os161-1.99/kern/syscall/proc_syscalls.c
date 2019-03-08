@@ -11,7 +11,7 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
-#include "opt-A2.h"
+#include "opt-A3.h"
 
 #if OPT_A3
 
