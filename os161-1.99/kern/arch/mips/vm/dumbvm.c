@@ -343,12 +343,41 @@ as_complete_load(struct addrspace *as)
 }
 
 int
-as_define_stack(struct addrspace *as, vaddr_t *stackptr)
+as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t argc)
 {
 	KASSERT(as->as_stackpbase != 0);
 
 	*stackptr = USERSTACK;
-	return 0;
+	int err = 0;
+
+	// Convert userptr_t into an iterable form
+	userptr_t *u_args = (userptr_t *) argv;
+
+	// Align the first string address
+	stackptr = ROUNDUP(stackptr - 8, 8);
+
+	// Put args onto the stack
+	// (Malloc space as you go along)
+	for(size_t i = 0; i < argc; i++){
+		size_t *got = kmalloc(sizeof(size_t));
+		size_t curr_len = strlen((char *) u_args[i]) + 1;
+		char *str = kmalloc(curr_len * sizeof(char));
+
+		err = copyinstr(u_args[i], str, curr_len, got);
+		if(err){
+			panic("Copy instr is bullying me in as_define_stack");
+		}
+
+		err = copyoutstr(str, (userptr_t) stackptr, curr_len, got);
+		if(err){
+			panic("Copy outstr is bullying me in as_define_stack");
+		}
+
+		// Modify stackptr as you go along
+		stackptr = ROUNDUP(stackptr - curr_len - 8, 8);
+	}
+
+	return err;
 }
 
 int
