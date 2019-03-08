@@ -2,6 +2,7 @@
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
+#include <kern/fcntl.h>
 #include <mips/trapframe.h>
 #include <lib.h>
 #include <synch.h>
@@ -12,7 +13,6 @@
 #include <addrspace.h>
 #include <copyinout.h>
 #include <vfs.h>
-#include <fcntl.h>
 #include "opt-A2.h"
 
 #if OPT_A2
@@ -263,7 +263,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 	int result;
 
 	/* Open the file. */
-	result = vfs_open(program, O_RDONLY, 0, &v);
+	result = vfs_open(progname, O_RDONLY, 0, &v);
 	if (result) {
 		return result;
 	}
