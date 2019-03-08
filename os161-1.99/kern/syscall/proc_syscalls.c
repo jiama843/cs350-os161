@@ -267,8 +267,14 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   struct addrspace *as;
 	struct vnode *v;
+
+  size_t prog_length = userptr_len((userptr_t *) progname);
+  char *prog = kmalloc(sizeof(length));
+
 	vaddr_t entrypoint, stackptr;
 	int result;
+
+  copyin(progname, prog, prog_length);
 
 	/* Open the file. */
 	result = vfs_open((char *) progname, O_RDONLY, 0, &v);
@@ -294,6 +300,8 @@ int sys_execv(userptr_t progname, userptr_t args){
 		vfs_close(v);
 		return result;
 	}
+
+  as_destroy(as);
 
 	/* Done with the file now. */
 	vfs_close(v);
