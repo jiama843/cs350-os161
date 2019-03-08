@@ -61,7 +61,7 @@ struct proc {
 	/* VFS */
 	struct vnode *p_cwd;		/* current working directory */
 
-#if OPT_A2
+#if OPT_A3
 	volatile pid_t pid;
 
 	struct array *family; // Keep track of proc_info for child processes
