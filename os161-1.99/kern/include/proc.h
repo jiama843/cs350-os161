@@ -39,7 +39,7 @@
 #include <spinlock.h>
 #include <thread.h> /* required for struct threadarray */
 
-#include "opt-A3.h"
+#include "opt-A2.h"
 
 struct addrspace;
 struct vnode;
@@ -61,7 +61,7 @@ struct proc {
 	/* VFS */
 	struct vnode *p_cwd;		/* current working directory */
 
-#if OPT_A3
+#if OPT_A2
 	volatile pid_t pid;
 
 	struct array *family; // Keep track of proc_info for child processes

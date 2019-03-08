@@ -35,7 +35,7 @@
 #include <thread.h>
 #include <current.h>
 #include <syscall.h>
-#include "opt-A3.h"
+#include "opt-A2.h"
 
 /*
  * System call dispatcher.
@@ -108,7 +108,7 @@ syscall(struct trapframe *tf)
 		err = sys___time((userptr_t)tf->tf_a0,
 				 (userptr_t)tf->tf_a1);
 		break;
-#if OPT_A3
+#if OPT_A2
 	case SYS_execv:
 		err = sys_execv((userptr_t)->tf_a0,
 				(userptr_t)->tf_a1);
