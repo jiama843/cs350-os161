@@ -37,7 +37,6 @@
 #include <mips/tlb.h>
 #include <addrspace.h>
 #include <copyinout.h>
-#include <lib.h>
 #include <vm.h>
 
 /*
@@ -355,7 +354,6 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t 
 	// Convert userptr_t into an iterable form
 	userptr_t *u_args = (userptr_t *) argv;
 
-	// Align the first string address
 	*stackptr = ROUNDUP(stackptr - 8, 8);
 
 	// Put args onto the stack
@@ -375,7 +373,6 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t 
 			panic("Copy outstr is bullying me in as_define_stack");
 		}
 
-		// Modify stackptr as you go along
 		*stackptr = ROUNDUP(stackptr - curr_len - 8, 8);
 	}
 
