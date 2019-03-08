@@ -11,6 +11,7 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include <vfs.h>
 #include "opt-A2.h"
 
 #if OPT_A2
@@ -261,7 +262,7 @@ int sys_execv(const char *program, char **args){
 	int result;
 
 	/* Open the file. */
-	result = vfs_open(progname, O_RDONLY, 0, &v);
+	result = vfs_open(program, O_RDONLY, 0, &v);
 	if (result) {
 		return result;
 	}
