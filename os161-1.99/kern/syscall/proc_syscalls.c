@@ -75,7 +75,7 @@ static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
   int err;
 
   userptr_t *u_new = (userptr_t *) u_old;
-	for(int i = 0; i < args_len; i++){
+	for(size_t i = 0; i < args_len; i++){
 
     char *str = kmalloc(NAME_MAX);
 
@@ -294,6 +294,11 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   char *prog = kmalloc(NAME_MAX);
 
+	vaddr_t entrypoint, stackptr;
+	int result;
+
+
+  // Copying to args to kernel space
   size_t args_len = userptr_len((userptr_t *) args);
   userptr_t *argv = kmalloc(args_len * sizeof(userptr_t));
 
@@ -302,10 +307,10 @@ int sys_execv(userptr_t progname, userptr_t args){
     panic("This shouldn't run");
   }
 
-	vaddr_t entrypoint, stackptr;
-	int result;
 
+  // Copying Program path to kernel space
   copyinstr(progname, prog, NAME_MAX, NULL);
+
 
 	/* Open the file. */
 	result = vfs_open((char *) progname, O_RDONLY, 0, &v);
@@ -346,7 +351,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(args_len, argv, stackptr, entrypoint);
+	enter_new_process(args_len, (userptr_t) argv, stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");
