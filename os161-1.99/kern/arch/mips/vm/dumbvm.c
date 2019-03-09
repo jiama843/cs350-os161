@@ -29,6 +29,7 @@
 
 #include <types.h>
 #include <kern/errno.h>
+#include <limits.h>
 #include <lib.h>
 #include <spl.h>
 #include <spinlock.h>
