@@ -71,6 +71,29 @@ static size_t userptr_len(userptr_t *u){
 	return len;
 }
 
+static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
+  int err;
+
+  userptr_t *u_new = (userptr_t *) u_old;
+	for(int i = 0; i < args_len; i++){
+
+    char *str = kmalloc(NAME_MAX);
+
+    err = copyinstr(u_new[i], str, NAME_MAX, NULL);
+    if(err){
+			panic("Copy instr is bullying me in userptr_copy");
+		}
+
+		size_t curr_len = strlen(str) + 1;
+
+		err = copyoutstr(str, u[i], curr_len, NULL);
+		if(err){
+			panic("Copy outstr is bullying me in userptr_copy");
+		}
+	}
+	return 0;
+}
+
 int sys_fork(struct trapframe *tf, pid_t *retval){
 
   int err;
@@ -271,8 +294,13 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   char *prog = kmalloc(NAME_MAX);
 
-  userptr_t argv = args; // Might need to store this by mallocing
-  size_t args_len = userptr_len((userptr_t *) argv);
+  size_t args_len = userptr_len((userptr_t *) args);
+  userptr_t *argv = kmalloc(args_len * sizeof(userptr_t));
+
+  result = userptr_copy(args, argv, args_len);
+  if(result){
+    panic("This shouldn't run");
+  }
 
 	vaddr_t entrypoint, stackptr;
 	int result;
