@@ -86,7 +86,7 @@ static size_t userptr_copy(userptr_t u_old, char **u, size_t args_len){
 
     err = copyinstr(u_new[i], str, NAME_MAX, NULL);
     if(err){
-			panic("Copy instr is bullying me in userptr_copy");
+      return err;
 		}
 
     // Make this waste less space
@@ -303,7 +303,6 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   // Copying to args to kernel space
   size_t args_len = userptr_len((userptr_t *) args);
-  //userptr_t *argv = kmalloc(args_len * sizeof(userptr_t));
   char **argv = kmalloc(args_len * sizeof(char *));
 
   result = userptr_copy(args, argv, args_len);
@@ -355,7 +354,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(args_len - 1, (userptr_t) argv, stackptr, entrypoint);
+	enter_new_process(args_len - 1, (userptr_t) stackptr, stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");

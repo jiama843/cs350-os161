@@ -366,10 +366,9 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 
 			*stackptr = ROUNDUP(*stackptr - ((argc + 1) * sizeof(userptr_t)) - 8, 8);
 
-			kprintf("stackptr is %x\n", (int) *stackptr);
 			err = copyout(stack_arr, (userptr_t) *stackptr, (argc + 1) * sizeof(userptr_t));
 			if(err){
-				panic("Copy outstr is bullying me in NULL case in as_define_stack");
+				return err;
 			}
 
 			break;
@@ -380,11 +379,10 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		// Modify stackptr as you go along (including the first one)
 		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
 		stack_arr[i] = (userptr_t) *stackptr;
-		kprintf("stackptr non NULL is %x\n", (int) stack_arr[i]);
 
 		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
 		if(err){
-			panic("Copy outstr is bullying me in as_define_stack");
+			return err;
 		}
 	}
 
