@@ -88,7 +88,7 @@ static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
     u[i] = kmalloc(curr_len);
 
     // TODO: Figure out why this is being bullied
-		err = copyoutstr(str, u[i], NAME_MAX, NULL);
+		err = copyoutstr(str, u[i], curr_len, NULL);
 		if(err){
 			panic("Copy outstr is bullying me in userptr_copy");
 		}
