@@ -360,14 +360,16 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t 
 	// Put args onto the stack
 	// (Malloc space as you go along)
 	for(size_t i = 0; i < argc; i++){
-		//size_t *got = kmalloc(sizeof(size_t));
-		size_t curr_len = strlen((char *) u_args[i]) + 1;
-		char *str = kmalloc(curr_len * sizeof(char));
 
-		err = copyinstr(u_args[i], str, curr_len, NULL);
+		//size_t *got = kmalloc(sizeof(size_t));
+		char *str = kmalloc(NAME_MAX);
+
+		err = copyinstr(u_args[i], str, NAME_MAX, NULL);
 		if(err){
 			panic("Copy instr is bullying me in as_define_stack");
 		}
+
+		size_t curr_len = strlen(str) + 1;
 
 		err = copyoutstr(str, (userptr_t) *stackptr, curr_len, NULL);
 		if(err){
