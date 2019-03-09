@@ -64,6 +64,7 @@ static bool hasExited(struct array *family, pid_t pid){
 
 static size_t userptr_len(userptr_t *u){
   char *uStr = (char *) u;
+  uStr = NULL;
 	size_t len = 0;
 	for(int i = 0; u[i] != NULL; i++){
 		len++;
