@@ -290,7 +290,8 @@ int sys_execv(userptr_t progname, userptr_t args){
 	}
 
 	/* Switch to it and activate it. */
-	curproc_setas(as);
+  as_deactivate();
+	struct addrspace * oldas = curproc_setas(as);
 	as_activate();
 
 	/* Load the executable. */
@@ -301,7 +302,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 		return result;
 	}
 
-  as_destroy(as);
+  as_destroy(oldas);
 
 	/* Done with the file now. */
 	vfs_close(v);
