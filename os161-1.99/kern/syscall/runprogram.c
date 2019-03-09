@@ -98,7 +98,7 @@ runprogram(char *progname, char **argv, unsigned long nargs)
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(nargs /*argc*/, (userptr_t) argv /*userspace addr of argv*/,
+	enter_new_process(nargs /*argc*/, (userptr_t) stackptr /*userspace addr of argv*/,
 			  stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
