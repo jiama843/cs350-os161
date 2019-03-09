@@ -377,8 +377,8 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		}
 	}
 
-	*stackptr = ROUNDUP(*stackptr - argc * sizeof(vaddr) - 8, 8);
-	err = copyoutstr(stack_arr, (userptr_t) *stackptr, argc * sizeof(vaddr));//got);
+	*stackptr = ROUNDUP(*stackptr - argc * sizeof(vaddr_t) - 8, 8);
+	err = copyout(stack_arr, (userptr_t) *stackptr, argc * sizeof(vaddr_t));//got);
 	if(err){
 		panic("Copy outstr is bullying me in outside the for loop in as_define_stack");
 	}
