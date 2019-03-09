@@ -63,8 +63,6 @@ static bool hasExited(struct array *family, pid_t pid){
 }
 
 static size_t userptr_len(userptr_t *u){
-  char *uStr = (char *) u;
-  uStr = NULL;
 	size_t len = 0;
 	for(int i = 0; u[i] != NULL; i++){
 		len++;
@@ -270,13 +268,12 @@ int sys_execv(userptr_t progname, userptr_t args){
   struct addrspace *as;
 	struct vnode *v;
 
-  size_t prog_length = userptr_len((userptr_t *) progname);
-  char *prog = kmalloc(sizeof(prog_length));
+  char *prog = kmalloc(NAME_MAX);
 
 	vaddr_t entrypoint, stackptr;
 	int result;
 
-  copyin(progname, prog, prog_length);
+  copyinstr(progname, prog, NAME_MAX, NULL);
 
 	/* Open the file. */
 	result = vfs_open((char *) progname, O_RDONLY, 0, &v);
