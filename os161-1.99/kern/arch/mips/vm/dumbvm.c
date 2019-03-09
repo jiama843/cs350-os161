@@ -345,7 +345,7 @@ as_complete_load(struct addrspace *as)
 }
 
 int
-as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t *argv, size_t argc)
+as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t argc)
 {
 	KASSERT(as->as_stackpbase != 0);
 
@@ -361,22 +361,22 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t *argv, size_t
 
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
-		/*if(u_args[i] == NULL){ 
+		if(argv[i] == NULL){ 
 
-			break; 
-		}*/
-
-		//size_t *got = kmalloc(sizeof(size_t));
-		char *str = kmalloc(NAME_MAX);
-
-		err = copyinstr(argv[i], str, NAME_MAX, NULL); //got);
-		if(err){
-			panic("Copy instr is bullying me in as_define_stack");
+			break;
 		}
 
-		size_t curr_len = strlen(str) + 1;
+		//size_t *got = kmalloc(sizeof(size_t));
+		//char *str = kmalloc(NAME_MAX);
 
-		err = copyoutstr(str, (userptr_t) *stackptr, curr_len, NULL);//got);
+		/*err = copyinstr(argv[i], str, NAME_MAX, NULL); //got);
+		if(err){
+			panic("Copy instr is bullying me in as_define_stack");
+		}*/
+
+		size_t curr_len = strlen(argv[i]) + 1;
+
+		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
 		if(err){
 			panic("Copy outstr is bullying me in as_define_stack");
 		}

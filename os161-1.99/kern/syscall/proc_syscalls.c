@@ -71,7 +71,7 @@ static size_t userptr_len(userptr_t *u){
 	return len + 1;
 }
 
-static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
+static size_t userptr_copy(userptr_t u_old, char **u, size_t args_len){
   int err;
 
   userptr_t *u_new = (userptr_t *) u_old;
@@ -89,8 +89,16 @@ static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
 			panic("Copy instr is bullying me in userptr_copy");
 		}
 
-		//size_t curr_len = strlen(str) + 1;
-    u[i] = (userptr_t) str;
+		size_t curr_len = strlen(str) + 1;
+    
+    u[i] = kmalloc(curr_len);
+    u[i] = str;
+
+    // TODO: Figure out why this is being bullied
+		/*err = copyoutstr(str, (userptr_t) &u[i], curr_len, NULL);
+		if(err){
+			panic("Copy outstr is bullying me in userptr_copy");
+		}*/
 	}
 	return 0;
 }
@@ -301,7 +309,8 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   // Copying to args to kernel space
   size_t args_len = userptr_len((userptr_t *) args);
-  userptr_t *argv = kmalloc(args_len * sizeof(userptr_t));
+  //userptr_t *argv = kmalloc(args_len * sizeof(userptr_t));
+  char **argv = kmalloc(args_len * sizeof(char *));
 
   result = userptr_copy(args, argv, args_len);
   if(result){
