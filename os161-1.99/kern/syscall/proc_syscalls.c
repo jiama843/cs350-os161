@@ -5,6 +5,7 @@
 #include <kern/fcntl.h>
 #include <mips/trapframe.h>
 #include <lib.h>
+#include <kern/limits.h>
 #include <synch.h>
 #include <syscall.h>
 #include <current.h>
