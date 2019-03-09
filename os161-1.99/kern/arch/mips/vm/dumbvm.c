@@ -353,7 +353,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 	int err;
 
 	// Align the first string address
-	*stackptr = ROUNDUP(*stackptr - 8, 8);
+	//*stackptr = ROUNDUP(*stackptr - 8, 8);
 
 	// Put args onto the stack
 	// (Malloc space as you go along)
@@ -376,13 +376,13 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 
 		size_t curr_len = strlen(argv[i]) + 1;
 
+		// Modify stackptr as you go along (including the first one)
+		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
+
 		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
 		if(err){
 			panic("Copy outstr is bullying me in as_define_stack");
 		}
-
-		// Modify stackptr as you go along
-		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
 	}
 
 	return err;
