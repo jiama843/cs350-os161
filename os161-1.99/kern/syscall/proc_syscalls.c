@@ -89,7 +89,7 @@ static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
 			panic("Copy instr is bullying me in userptr_copy");
 		}
 
-		size_t curr_len = strlen(str) + 1;
+		//size_t curr_len = strlen(str) + 1;
     u[i] = (userptr_t) str;
 	}
 	return 0;
