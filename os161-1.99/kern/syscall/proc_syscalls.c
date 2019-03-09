@@ -89,9 +89,8 @@ static size_t userptr_copy(userptr_t u_old, char **u, size_t args_len){
 			panic("Copy instr is bullying me in userptr_copy");
 		}
 
-		size_t curr_len = strlen(str) + 1;
-    
     // Make this waste less space
+		//size_t curr_len = strlen(str) + 1;
     //u[i] = kmalloc(curr_len);
     u[i] = str;
 	}
