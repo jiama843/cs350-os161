@@ -361,7 +361,15 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
 		if(argv[i] == NULL){
+
 			stack_arr[i] = (vaddr_t) NULL;
+
+			*stackptr = ROUNDUP(*stackptr - argc * sizeof(vaddr_t) - 8, 8);
+			err = copyout(stack_arr, (userptr_t) *stackptr, argc * sizeof(vaddr_t));
+			if(err){
+				panic("Copy outstr is bullying me in NULL case in as_define_stack");
+			}
+			
 			break;
 		}
 
@@ -375,12 +383,6 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		if(err){
 			panic("Copy outstr is bullying me in as_define_stack");
 		}
-	}
-
-	*stackptr = ROUNDUP(*stackptr - argc * sizeof(vaddr_t) - 8, 8);
-	err = copyout(stack_arr, (userptr_t) *stackptr, argc * sizeof(vaddr_t));//got);
-	if(err){
-		panic("Copy outstr is bullying me in outside the for loop in as_define_stack");
 	}
 
 	return err;
