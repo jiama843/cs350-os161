@@ -349,7 +349,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 {
 	KASSERT(as->as_stackpbase != 0);
 
-	userptr_t *stack_arr = kmalloc(argc * sizeof(userptr_t));
+	userptr_t *stack_arr = kmalloc((argc + 1) * sizeof(userptr_t));
 
 	*stackptr = USERSTACK;
 	int err;
@@ -360,7 +360,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
-		if(argv[i] == NULL){
+		if(i == argc){
 
 			stack_arr[i] = (userptr_t) NULL;
 
