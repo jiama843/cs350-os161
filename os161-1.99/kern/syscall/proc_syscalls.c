@@ -271,6 +271,8 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   char *prog = kmalloc(NAME_MAX);
 
+  size_t args_len = userptr_len((userptr_t *) args);
+
 	vaddr_t entrypoint, stackptr;
 	int result;
 
@@ -308,14 +310,14 @@ int sys_execv(userptr_t progname, userptr_t args){
 	vfs_close(v);
 
 	/* Define the user stack in the address space */
-	result = as_define_stack(as, &stackptr, args, userptr_len((userptr_t *) args));
+	result = as_define_stack(as, &stackptr, args, args_len);
 	if (result) {
 		/* p_addrspace will go away when curproc is destroyed */
 		return result;
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(userptr_len((userptr_t *) args), args, stackptr, entrypoint);
+	enter_new_process(args_len, args, stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
 	panic("enter_new_process returned\n");
