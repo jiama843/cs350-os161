@@ -360,7 +360,14 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t 
 
 	// Put args onto the stack
 	// (Malloc space as you go along)
-	for(size_t i = 0; i < argc; i++){
+	for(size_t i = 1; i < argc; i++){
+
+		// Break early if NULL and 
+		// put args on the top of the stack and increment stack pointer (do you have to do this?)
+		/*if(u_args[i] == NULL){ 
+
+			break; 
+		}*/
 
 		//size_t *got = kmalloc(sizeof(size_t));
 		char *str = kmalloc(NAME_MAX);
