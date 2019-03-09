@@ -356,7 +356,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 
 	// Put args onto the stack
 	// (Malloc space as you go along)
-	for(size_t i = 0; i < argc; i++){
+	for(size_t i = 0; i < argc + 1; i++){
 
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
