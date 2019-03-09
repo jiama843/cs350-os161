@@ -369,7 +369,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 			if(err){
 				panic("Copy outstr is bullying me in NULL case in as_define_stack");
 			}
-			
+
 			break;
 		}
 
@@ -378,6 +378,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		// Modify stackptr as you go along (including the first one)
 		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
 		stack_arr[i] = *stackptr;
+		kprintf("stackptr is %d\n", (int) *stackptr);
 
 		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
 		if(err){
