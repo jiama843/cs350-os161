@@ -271,7 +271,7 @@ int sys_execv(userptr_t progname, userptr_t args){
 
   char *prog = kmalloc(NAME_MAX);
 
-  userptr_t argv = args;
+  userptr_t argv = args; // Might need to store this by mallocing
   size_t args_len = userptr_len((userptr_t *) argv);
 
 	vaddr_t entrypoint, stackptr;
