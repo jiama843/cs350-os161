@@ -349,11 +349,10 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 {
 	KASSERT(as->as_stackpbase != 0);
 
+	vaddr_t *stack_arr = kmalloc(argc * sizeof(vaddr_t));
+
 	*stackptr = USERSTACK;
 	int err;
-
-	// Align the first string address
-	//*stackptr = ROUNDUP(*stackptr - 8, 8);
 
 	// Put args onto the stack
 	// (Malloc space as you go along)
@@ -361,28 +360,27 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
-		if(argv[i] == NULL){ 
-
+		if(argv[i] == NULL){
+			stack_arr[i] = NULL;
 			break;
 		}
-
-		//size_t *got = kmalloc(sizeof(size_t));
-		//char *str = kmalloc(NAME_MAX);
-
-		/*err = copyinstr(argv[i], str, NAME_MAX, NULL); //got);
-		if(err){
-			panic("Copy instr is bullying me in as_define_stack");
-		}*/
 
 		size_t curr_len = strlen(argv[i]) + 1;
 
 		// Modify stackptr as you go along (including the first one)
 		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
+		stack_arr[i] = *stackptr;
 
 		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
 		if(err){
 			panic("Copy outstr is bullying me in as_define_stack");
 		}
+	}
+
+	*stackptr = ROUNDUP(*stackptr - argc * sizeof(vaddr) - 8, 8);
+	err = copyoutstr(stack_arr, (userptr_t) *stackptr, argc * sizeof(vaddr));//got);
+	if(err){
+		panic("Copy outstr is bullying me in outside the for loop in as_define_stack");
 	}
 
 	return err;
