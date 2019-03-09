@@ -91,14 +91,14 @@ runprogram(char *progname)
 	vfs_close(v);
 
 	/* Define the user stack in the address space */
-	result = as_define_stack(as, &stackptr, argv, args_len);
+	result = as_define_stack(as, &stackptr, NULL, 0);//argv, args_len);
 	if (result) {
 		/* p_addrspace will go away when curproc is destroyed */
 		return result;
 	}
 
 	/* Warp to user mode. */
-	enter_new_process(args_len /*argc*/, argv /*userspace addr of argv*/,
+	enter_new_process(0, NULL, //args_len /*argc*/, argv /*userspace addr of argv*/,
 			  stackptr, entrypoint);
 	
 	/* enter_new_process does not return. */
