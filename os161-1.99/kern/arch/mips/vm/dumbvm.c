@@ -365,7 +365,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, userptr_t argv, size_t 
 		size_t *got = kmalloc(sizeof(size_t));
 		char *str = kmalloc(NAME_MAX);
 
-		err = copyinstr(u_args[i], str, NAME_MAX, got);
+		err = copyinstr((userptr_t) u_args[i], str, NAME_MAX, got);
 		if(err){
 			panic("Copy instr is bullying me in as_define_stack");
 		}
