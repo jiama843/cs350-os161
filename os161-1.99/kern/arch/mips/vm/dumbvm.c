@@ -361,7 +361,7 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 		// Break early if NULL and 
 		// put args on the top of the stack and increment stack pointer (do you have to do this?)
 		if(argv[i] == NULL){
-			stack_arr[i] = NULL;
+			stack_arr[i] = (vaddr_t) NULL;
 			break;
 		}
 
