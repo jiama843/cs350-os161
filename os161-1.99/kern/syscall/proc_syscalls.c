@@ -68,7 +68,7 @@ static size_t userptr_len(userptr_t *u){
 	for(int i = 0; u[i] != NULL; i++){
 		len++;
 	}
-	return len;
+	return len + 1;
 }
 
 static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
@@ -76,6 +76,11 @@ static size_t userptr_copy(userptr_t u_old, userptr_t *u, size_t args_len){
 
   userptr_t *u_new = (userptr_t *) u_old;
 	for(size_t i = 0; i < args_len; i++){
+
+    if(u_new[i] == NULL){
+      u[i] = NULL;
+      break;
+    }
 
     char *str = kmalloc(NAME_MAX);
 
