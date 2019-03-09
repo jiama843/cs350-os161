@@ -65,12 +65,10 @@ static bool hasExited(struct array *family, pid_t pid){
 
 static size_t userptr_len(userptr_t *u){
 	size_t len = 0;
-  while(u[len] != NULL){
-	//for(int i = 0; u[i] != NULL; i++){
+	for(int i = 0; u[i] != NULL; i++){
 		len++;
-	//}
-  }
-	return len + 1;
+	}
+	return len;
 }
 
 int sys_fork(struct trapframe *tf, pid_t *retval){
