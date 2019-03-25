@@ -200,7 +200,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 		return 0;
 	}
 
-	kprintf("dumbvm: Ran out of TLB entries - overwriting existing entry \n");
+	//kprintf("dumbvm: Ran out of TLB entries - overwriting existing entry \n");
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
