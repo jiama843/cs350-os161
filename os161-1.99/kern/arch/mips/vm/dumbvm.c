@@ -202,7 +202,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	}
 
 	kprintf("dumbvm: Ran out of TLB entries - overwriting existing entry \n");
-	tlb_random(, );
+	//tlb_random(, );
 	//kprintf("dumbvm: Ran out of TLB entries - cannot handle page fault\n");
 	splx(spl);
 	return 0;
