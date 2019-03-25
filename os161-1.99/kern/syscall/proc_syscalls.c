@@ -175,6 +175,11 @@ void sys__exit(int exitcode) {
   
   thread_exit();
   /* thread_exit() does not return, so we should never get here */
+
+  if(exitcode == SIGSEGV){
+    return;
+  }
+
   panic("return from thread_exit in sys_exit\n");
 }
 

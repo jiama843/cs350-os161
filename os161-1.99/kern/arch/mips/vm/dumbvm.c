@@ -194,6 +194,12 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 		}
 		ehi = faultaddress;
 		elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
+
+		// Add elo if load elf has completed
+		if(as->done_load_elf){
+			elo &= ~TLBLO_DIRTY;
+		}
+
 		DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 		tlb_write(ehi, elo, i);
 		splx(spl);
@@ -205,7 +211,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 	tlb_random(ehi, elo);
-	
+
 	splx(spl);
 	return 0;
 	//return EFAULT;
@@ -219,6 +225,7 @@ as_create(void)
 		return NULL;
 	}
 
+	done_load_elf = true;
 	as->as_vbase1 = 0;
 	as->as_pbase1 = 0;
 	as->as_npages1 = 0;
