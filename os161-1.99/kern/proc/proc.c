@@ -50,7 +50,7 @@
 #include <vfs.h>
 #include <synch.h>
 #include <kern/fcntl.h>  
-#include "opt-A2.h"
+#include "opt-A3.h"
 
 /*
  * The process for the kernel; this holds all the kernel-only threads.
@@ -73,7 +73,7 @@ struct semaphore *no_proc_sem;
 /*
 * Pid assignment mechanism
 */
-#if OPT_A2
+#if OPT_A3
 // Count the number of pids (to assign unique)
 static volatile unsigned int pid_count;
 // Lock the pid_count
@@ -208,7 +208,7 @@ proc_bootstrap(void)
     panic("proc_create for kproc failed\n");
   }
 
-#if OPT_A2
+#if OPT_A3
 	pid_count = 2;
 	pid_lock = lock_create("pid_lock");
 	if (pid_lock == NULL){
@@ -245,7 +245,7 @@ proc_create_runprogram(const char *name)
 		return NULL;
 	}
 
-#if OPT_A2
+#if OPT_A3
 	/* increment the pid count */
 	proc->family = array_create();
 

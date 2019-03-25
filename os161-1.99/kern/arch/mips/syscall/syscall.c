@@ -35,7 +35,7 @@
 #include <thread.h>
 #include <current.h>
 #include <syscall.h>
-#include "opt-A2.h"
+#include "opt-A3.h"
 
 /*
  * System call dispatcher.
@@ -108,7 +108,7 @@ syscall(struct trapframe *tf)
 		err = sys___time((userptr_t)tf->tf_a0,
 				 (userptr_t)tf->tf_a1);
 		break;
-#if OPT_A2
+#if OPT_A3
 	case SYS_fork:
 		err = sys_fork(tf, (pid_t *) &retval);
 		break;
@@ -181,7 +181,7 @@ syscall(struct trapframe *tf)
  *
  * Thus, you can trash it and do things another way if you prefer.
  */
-#if OPT_A2
+#if OPT_A3
 void
 enter_forked_process(void *tf, unsigned long length)
 {

@@ -30,7 +30,7 @@
 #ifndef _SYSCALL_H_
 #define _SYSCALL_H_
 
-#include "opt-A2.h"
+#include "opt-A3.h"
 
 struct trapframe; /* from <machine/trapframe.h> */
 
@@ -45,7 +45,7 @@ void syscall(struct trapframe *tf);
  */
 
 /* Helper for fork(). You write this. */
-#if OPT_A2
+#if OPT_A3
 void enter_forked_process(void *tf, unsigned long length);
 #endif
 
@@ -61,7 +61,7 @@ void enter_new_process(int argc, userptr_t argv, vaddr_t stackptr,
 int sys_reboot(int code);
 int sys___time(userptr_t user_seconds, userptr_t user_nanoseconds);
 
-#if OPT_A2
+#if OPT_A3
 int sys_fork(struct trapframe *tf, pid_t *retval);
 #endif
 

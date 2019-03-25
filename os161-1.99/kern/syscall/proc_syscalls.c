@@ -11,9 +11,9 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
-#include "opt-A2.h"
+#include "opt-A3.h"
 
-#if OPT_A2
+#if OPT_A3
 
 // Also handle setting hasParent to false
 static void kill_family(struct array *family){
@@ -185,7 +185,7 @@ sys_getpid(pid_t *retval)
 {
   /* for now, this is just a stub that always returns a PID of 1 */
   /* you need to fix this to make it work properly */
-  #if OPT_A2
+  #if OPT_A3
   *retval = curproc->pid;
   #else
   *retval = 1;
