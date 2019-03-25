@@ -187,7 +187,6 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	/* Disable interrupts on this CPU while frobbing the TLB. */
 	spl = splhigh();
 
-	kprintf("NUMTLB: %d", NUM_TLB);
 	for (i=0; i<NUM_TLB; i++) {
 		tlb_read(&ehi, &elo, i);
 		if (elo & TLBLO_VALID) {
@@ -202,7 +201,10 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	}
 
 	kprintf("dumbvm: Ran out of TLB entries - overwriting existing entry \n");
-	//tlb_random(, );
+	ehi = faultaddress;
+	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
+	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
+	tlb_random(ehi, elo);
 	//kprintf("dumbvm: Ran out of TLB entries - cannot handle page fault\n");
 	splx(spl);
 	return 0;
