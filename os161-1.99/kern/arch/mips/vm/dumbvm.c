@@ -197,9 +197,9 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 		elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 
 		// Add elo if load elf has completed
-		/*if(as->done_load_elf){
+		if(as->done_load_elf){
 			elo &= ~TLBLO_DIRTY;
-		}*/
+		}
 
 		DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 		tlb_write(ehi, elo, i);
