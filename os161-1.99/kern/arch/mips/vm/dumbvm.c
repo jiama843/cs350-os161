@@ -198,7 +198,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 
 		// Add elo if load elf has completed
 		kprintf("DONE LOADING: %d", as->done_load_elf);
-		if(as->done_load_elf){
+		if(as->done_load_elf && ehi >= v_base1 && ehi < v_top1){
 			elo &= ~TLBLO_DIRTY;
 		}
 
@@ -212,10 +212,10 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 	
-	if(as->done_load_elf){
+	if(as->done_load_elf && ehi >= v_base1 && ehi < v_top1){
 		elo &= ~TLBLO_DIRTY;
 	}
-	
+
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 	tlb_random(ehi, elo);
 
