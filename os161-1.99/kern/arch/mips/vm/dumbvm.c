@@ -212,9 +212,9 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
 	
-	/*if(as->done_load_elf && ehi >= vbase1 && ehi < vtop1){
+	if(as->done_load_elf && ehi >= vbase1 && ehi < vtop1){
 		elo &= ~TLBLO_DIRTY;
-	}*/
+	}
 
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 	tlb_random(ehi, elo);
