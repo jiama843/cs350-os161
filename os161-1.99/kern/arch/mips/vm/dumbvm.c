@@ -226,7 +226,7 @@ as_create(void)
 		return NULL;
 	}
 
-	as->done_load_elf = true;
+	as->done_load_elf = false;
 	as->as_vbase1 = 0;
 	as->as_pbase1 = 0;
 	as->as_npages1 = 0;
