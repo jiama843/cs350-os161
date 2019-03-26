@@ -188,8 +188,8 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	/* Disable interrupts on this CPU while frobbing the TLB. */
 	spl = splhigh();
 
-	kprintf("NUM_TLB %d\n", NUM_TLB);
-	kprintf("DONE LOADING: %d\n", as->done_load_elf);
+	//kprintf("NUM_TLB %d\n", NUM_TLB);
+	//kprintf("DONE LOADING: %d\n", as->done_load_elf);
 	for (i=0; i<NUM_TLB; i++) {
 		tlb_read(&ehi, &elo, i);
 		if (elo & TLBLO_VALID) {
