@@ -211,6 +211,10 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	//kprintf("dumbvm: Ran out of TLB entries - overwriting existing entry \n");
 	ehi = faultaddress;
 	elo = paddr | TLBLO_DIRTY | TLBLO_VALID;
+	
+	if(as->done_load_elf){
+		elo &= ~TLBLO_DIRTY;
+	}
 	DEBUG(DB_VM, "dumbvm: 0x%x -> 0x%x\n", faultaddress, paddr);
 	tlb_random(ehi, elo);
 
