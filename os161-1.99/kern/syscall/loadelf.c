@@ -304,7 +304,7 @@ load_elf(struct vnode *v, vaddr_t *entrypoint)
 
 	*entrypoint = eh.e_entry;
 	as->done_load_elf = true;
-	//as_activate();
+	as_activate();
 
 	return 0;
 }
