@@ -189,6 +189,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	spl = splhigh();
 
 	kprintf("NUM_TLB %d", NUM_TLB);
+	kprintf("DONE LOADING: %d", as->done_load_elf);
 	for (i=0; i<NUM_TLB; i++) {
 		tlb_read(&ehi, &elo, i);
 		if (elo & TLBLO_VALID) {
