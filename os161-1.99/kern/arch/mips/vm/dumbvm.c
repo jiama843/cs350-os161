@@ -119,15 +119,15 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	DEBUG(DB_VM, "dumbvm: fault: 0x%x\n", faultaddress);
 
 	switch (faulttype) {
-	    case VM_FAULT_READONLY:
-			/* We always create pages read-write, so we can't get this */
-			panic("dumbvm: got VM_FAULT_READONLY\n");
-				//return ;
-	    case VM_FAULT_READ:
-	    case VM_FAULT_WRITE:
-		break;
-	    default:
-		return EINVAL;
+		case VM_FAULT_READONLY:
+		/* We always create pages read-write, so we can't get this */
+		//panic("dumbvm: got VM_FAULT_READONLY\n");
+			return 6;
+		case VM_FAULT_READ:
+		case VM_FAULT_WRITE:
+			break;
+	  default:
+			return EINVAL;
 	}
 
 	if (curproc == NULL) {
