@@ -1,4 +1,5 @@
 #include <types.h>
+#include <signal.h>
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
