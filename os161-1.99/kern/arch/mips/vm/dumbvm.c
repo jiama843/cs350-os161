@@ -181,6 +181,7 @@ alloc_kpages(int npages)
 			}
 			kprintf("\n");
 
+			kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
@@ -224,6 +225,8 @@ free_kpages(vaddr_t addr)
 		kprintf("%d", coremap->map[j]);
 	}
 	kprintf("\n");
+
+	kprintf("ADDRESS to delete: %d", addr);
 
 }
 
