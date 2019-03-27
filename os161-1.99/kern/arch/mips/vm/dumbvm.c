@@ -111,7 +111,7 @@ getppages(unsigned long npages)
 
 			// Check if there are npage contiguous frames available
 			bool can_alloc = true;
-			for(int seg_page = 0; seg_page < npages; seg_page++){
+			for(size_t seg_page = 0; seg_page < npages; seg_page++){
 				if(coremap->map[i + seg_page] != 0){
 					can_alloc = false;
 					break;
@@ -124,12 +124,14 @@ getppages(unsigned long npages)
 			}
 
 			// if can_alloc, we alloc
-			for(int seg_page = 0; seg_page < npages; seg_page++){
+			for(size_t seg_page = 0; seg_page < npages; seg_page++){
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
+
+		return 0;
 	}
 	else{
 		paddr_t addr;
