@@ -103,6 +103,28 @@ paddr_t ram_stealmem(unsigned long npages);
 void ram_getsize(paddr_t *lo, paddr_t *hi);
 
 /*
+ * Coremap for TLB
+ * 
+ * We split the RAM into fixed frames of size PAGE_SIZE
+ * 
+ */
+struct coremap{
+
+	paddr_t firstaddr;
+	paddr_t lastaddr;
+
+	/*
+	 *	Keep track of frames and contiguous memory (attempt #2)
+	 */
+	int* map;
+
+	volatile bool allocated = false;
+	volatile int size;
+	volatile int total_frames;
+	volatile int remaining_frames;
+};
+
+/*
  * TLB shootdown bits.
  *
  * We'll take up to 16 invalidations before just flushing the whole TLB.

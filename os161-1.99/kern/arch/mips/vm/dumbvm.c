@@ -51,10 +51,31 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
+static coremap* coremap; /* Store coremap */
+
 void
 vm_bootstrap(void)
 {
-	/* Do nothing. */
+	
+	paddr_t firstaddr, lastaddr;
+	ram_getsize(&firstaddr, &lastaddr);
+
+	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
+
+	int num_coremap_frames = (lastaddr - firstaddr)/ 1024 / PAGE_SIZE;
+
+	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
+	coremap->lastaddr = lastaddr;
+	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
+	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
+
+	coremap->map = PADDR_TO_KVADDR(firstaddr);
+	for(int i = 0; i < coremap->total_frames; i++){
+		coremap->map[i] = 0;
+	}
+	//(coremap->total_frames * sizeof(int));
+
+	coremap->allocated = true;
 }
 
 static
@@ -75,12 +96,41 @@ getppages(unsigned long npages)
 vaddr_t 
 alloc_kpages(int npages)
 {
-	paddr_t pa;
-	pa = getppages(npages);
-	if (pa==0) {
-		return 0;
+
+	// Check to see if using coremap (if so, never call getppages again)
+	if(coremap->allocated){
+
+		for(int i = 0; i < coremap->total_frames; i++){
+
+			// Check if there are npage contiguous frames available
+			bool can_alloc = true;
+			for(int seg_page = 0; seg_page < npages; seg_page++){
+				if(coremap->map[i + seg_page] != 0){
+					can_alloc = false;
+					break;
+				}
+			}
+
+			if(!can_alloc){
+				i += npages;
+				continue;
+			}
+
+			// if can_alloc, we alloc
+			for(int seg_page = 0; seg_page < npages; seg_page++){
+				coremap->map[i + seg_page] = seg_page;
+			}
+
+			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
+		}
+	else{
+		paddr_t pa;
+		pa = getppages(npages);
+		if (pa==0) {
+			return 0;
+		}
+		return PADDR_TO_KVADDR(pa);
 	}
-	return PADDR_TO_KVADDR(pa);
 }
 
 void 
@@ -88,7 +138,13 @@ free_kpages(vaddr_t addr)
 {
 	/* nothing - leak the memory. */
 
-	(void)addr;
+	//(void)addr;
+	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
+
+	// Clear coremap
+	for(int i = 0; i < coremap->map[frame]; i++){
+		coremap->map[i] = 0;
+	}
 }
 
 void
