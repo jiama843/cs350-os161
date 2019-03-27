@@ -216,10 +216,10 @@ free_kpages(vaddr_t addr)
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
-	kprintf("addr: %d", addr);
-	kprintf("first addr: %d", coremap->firstaddr);
-	kprintf("feeling a little ballsy so how about this: %d", addr - 0x80000000);
-	kprintf("Deallocating starting from frame: %d", frame);
+	//kprintf("addr: %d\n", addr);
+	//kprintf("first addr: %d\n", coremap->firstaddr);
+	//kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
+	//kprintf("Deallocating starting from frame: %d\n", frame);
 
 	// Clear coremap
 	int i = frame;
@@ -523,8 +523,44 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr)
 {
 	KASSERT(as->as_stackpbase != 0);
 
+	userptr_t *stack_arr = kmalloc((argc + 1) * sizeof(userptr_t));
+
 	*stackptr = USERSTACK;
-	return 0;
+	int err;
+
+	// Put args onto the stack
+	// (Malloc space as you go along)
+	for(size_t i = 0; i < argc + 1; i++){
+
+		// Break early if NULL and 
+		// put args on the top of the stack and increment stack pointer (do you have to do this?)
+		if(i == argc){
+
+			stack_arr[i] = (userptr_t) NULL;
+
+			*stackptr = ROUNDUP(*stackptr - ((argc + 1) * sizeof(userptr_t)) - 8, 8);
+
+			err = copyout(stack_arr, (userptr_t) *stackptr, (argc + 1) * sizeof(userptr_t));
+			if(err){
+				return err;
+			}
+
+			break;
+		}
+
+		size_t curr_len = strlen(argv[i]) + 1;
+
+		// Modify stackptr as you go along (including the first one)
+		*stackptr = ROUNDUP(*stackptr - curr_len - 8, 8);
+		stack_arr[i] = (userptr_t) *stackptr;
+
+		err = copyoutstr(argv[i], (userptr_t) *stackptr, curr_len, NULL);//got);
+		if(err){
+			return err;
+		}
+	}
+
+	return err;
 }
 
 int

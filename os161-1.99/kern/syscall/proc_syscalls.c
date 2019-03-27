@@ -257,3 +257,76 @@ sys_waitpid(pid_t pid,
   return(0);
 }
 
+/* syscall for execv
+*/
+int sys_execv(userptr_t progname, userptr_t args){
+
+  struct addrspace *as;
+	struct vnode *v;
+
+  char *prog = kmalloc(NAME_MAX);
+
+	vaddr_t entrypoint, stackptr;
+	int result;
+
+
+  // Copying to args to kernel space
+  size_t args_len = userptr_len((userptr_t *) args);
+  char **argv = kmalloc(args_len * sizeof(char *));
+
+  result = userptr_copy(args, argv, args_len);
+  if(result){
+    panic("This shouldn't run");
+  }
+
+
+  // Copying Program path to kernel space
+  copyinstr(progname, prog, NAME_MAX, NULL);
+
+
+	/* Open the file. */
+	result = vfs_open((char *) progname, O_RDONLY, 0, &v);
+	if (result) {
+		return result;
+	}
+
+	/* Create a new address space. */
+	as = as_create();
+	if (as ==NULL) {
+		vfs_close(v);
+		return ENOMEM;
+	}
+
+	/* Switch to it and activate it. */
+  as_deactivate();
+	struct addrspace * oldas = curproc_setas(as);
+	as_activate();
+
+	/* Load the executable. */
+	result = load_elf(v, &entrypoint);
+	if (result) {
+		/* p_addrspace will go away when curproc is destroyed */
+		vfs_close(v);
+		return result;
+	}
+
+  as_destroy(oldas);
+
+	/* Done with the file now. */
+	vfs_close(v);
+
+	/* Define the user stack in the address space */
+	result = as_define_stack(as, &stackptr, argv, args_len - 1);
+	if (result) {
+		/* p_addrspace will go away when curproc is destroyed */
+		return result;
+	}
+
+	/* Warp to user mode. */
+	enter_new_process(args_len - 1, (userptr_t) stackptr, stackptr, entrypoint);
+	
+	/* enter_new_process does not return. */
+	panic("enter_new_process returned\n");
+	return EINVAL;
+
+}
