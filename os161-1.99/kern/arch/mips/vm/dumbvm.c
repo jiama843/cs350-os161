@@ -135,7 +135,7 @@ getppages(unsigned long npages)
 			}
 			kprintf("\n");
 
-			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
+			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
 		kprintf("Coremap can't be allocated at this time\n");
@@ -215,10 +215,10 @@ free_kpages(vaddr_t addr)
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
-	//kprintf("addr: %d", addr);
-	//kprintf("first addr: %d", coremap->firstaddr);
-	//kprintf("feeling a little ballsy so how about this: %d", addr - 0x80000000);
-	//kprintf("Deallocating starting from frame: %d", frame);
+	kprintf("addr: %d", addr);
+	kprintf("first addr: %d", coremap->firstaddr);
+	kprintf("feeling a little ballsy so how about this: %d", addr - 0x80000000);
+	kprintf("Deallocating starting from frame: %d", frame);
 
 	// Clear coremap
 	int i = frame;
