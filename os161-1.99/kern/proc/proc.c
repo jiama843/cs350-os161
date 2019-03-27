@@ -146,7 +146,6 @@ proc_destroy(struct proc *proc)
 		proc->p_cwd = NULL;
 	}
 
-
 #ifndef UW  // in the UW version, space destruction occurs in sys_exit, not here
 	if (proc->p_addrspace) {
 		/*
@@ -194,6 +193,11 @@ proc_destroy(struct proc *proc)
 	V(proc_count_mutex);
 #endif // UW
 	
+#if OPT_A3
+	kfree(proc->p_name);
+	as_destroy(proc->p_addrspace);
+	kfree(proc);
+#endif
 
 }
 

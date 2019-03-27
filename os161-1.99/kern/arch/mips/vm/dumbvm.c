@@ -153,7 +153,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		//kprintf("Coremap allocated\n");
+		kprintf("Coremap allocated\n");
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -177,7 +177,7 @@ alloc_kpages(int npages)
 			}
 
 			for(int j = 0; j < coremap->total_frames; j++){
-				//kprintf("%d", coremap->map[j]);
+				kprintf("%d", coremap->map[j]);
 			}
 			kprintf("\n");
 
@@ -200,7 +200,7 @@ void
 free_kpages(vaddr_t addr)
 {
 	/* nothing - leak the memory. */
-	//kprintf("Coremap deallocated\n");
+	kprintf("Coremap deallocated\n");
 
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
@@ -221,7 +221,7 @@ free_kpages(vaddr_t addr)
 	}
 
 	for(int j = 0; j < coremap->total_frames; j++){
-		//kprintf("%d", coremap->map[j]);
+		kprintf("%d", coremap->map[j]);
 	}
 	kprintf("\n");
 
