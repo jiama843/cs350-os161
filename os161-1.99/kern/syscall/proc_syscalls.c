@@ -1,4 +1,5 @@
 #include <types.h>
+#include <signal.h>
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
@@ -61,6 +62,40 @@ static bool hasExited(struct array *family, pid_t pid){
     }
   }
   return false;
+}
+
+static size_t userptr_len(userptr_t *u){
+	size_t len = 0;
+	for(int i = 0; u[i] != NULL; i++){
+		len++;
+	}
+	return len + 1;
+}
+
+static size_t userptr_copy(userptr_t u_old, char **u, size_t args_len){
+  int err;
+
+  userptr_t *u_new = (userptr_t *) u_old;
+	for(size_t i = 0; i < args_len; i++){
+
+    if(u_new[i] == NULL){
+      u[i] = NULL;
+      break;
+    }
+
+    char *str = kmalloc(NAME_MAX);
+
+    err = copyinstr(u_new[i], str, NAME_MAX, NULL);
+    if(err){
+      return err;
+		}
+
+    // Make this waste less space
+		//size_t curr_len = strlen(str) + 1;
+    //u[i] = kmalloc(curr_len);
+    u[i] = str;
+	}
+	return 0;
 }
 
 int sys_fork(struct trapframe *tf, pid_t *retval){
