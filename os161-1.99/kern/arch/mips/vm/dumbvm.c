@@ -51,7 +51,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-static coremap* coremap; /* Store coremap */
+static struct coremap* coremap; /* Store coremap */
 
 void
 vm_bootstrap(void)
@@ -125,6 +125,7 @@ alloc_kpages(int npages)
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
+	}
 	else{
 		paddr_t pa;
 		pa = getppages(npages);
