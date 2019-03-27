@@ -113,7 +113,7 @@ alloc_kpages(int npages)
 {
 
 	// Check to see if using coremap (if so, never call getppages again)
-	if(coremap->allocated){
+	if(coremap->allocated != NULL){
 
 		//kprintf("Coremap allocated");
 
