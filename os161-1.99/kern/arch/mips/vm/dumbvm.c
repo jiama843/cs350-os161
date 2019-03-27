@@ -56,6 +56,9 @@ static struct coremap* coremap; /* Store coremap */
 void
 vm_bootstrap(void)
 {
+
+	kprintf("Makes it here");
+
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
 
