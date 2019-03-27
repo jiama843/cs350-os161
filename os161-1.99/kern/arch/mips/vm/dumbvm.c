@@ -74,10 +74,10 @@ vm_bootstrap(void)
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
 
-	kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
+	kprintf("NEW FIRST ADDR IS: %d\n", coremap->firstaddr);
 
 	coremap->lastaddr = lastaddr;
-	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
+	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr) / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
 	kprintf("Sets coremap values\n");
