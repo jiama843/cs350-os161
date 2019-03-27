@@ -167,7 +167,7 @@ alloc_kpages(int npages)
 			}
 
 			if(!can_alloc){
-				//i += npages - 1;
+				i += npages - 1;
 				continue;
 			}
 
@@ -183,6 +183,11 @@ alloc_kpages(int npages)
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
+
+		for(int j = 0; j < coremap->total_frames; j++){
+			kprintf("%d", coremap->map[j]);
+		}
+		kprintf("\n");
 
 		return 0; // Should return out of memory error
 	}
