@@ -92,9 +92,9 @@ vm_bootstrap(void)
 	}
 	//(coremap->total_frames * sizeof(int));
 
-	for(int i = 0; i < coremap->total_frames; i++){
+	/*for(int i = 0; i < coremap->total_frames; i++){
 		kprintf("%d", coremap->map[i]);
-	}
+	}*/
 
 	coremap->allocated = true;
 
@@ -123,7 +123,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		//kprintf("Coremap allocated");
+		kprintf("Coremap allocated");
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
