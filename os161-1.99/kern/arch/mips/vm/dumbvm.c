@@ -149,6 +149,7 @@ alloc_kpages(int npages)
 			for(int j = 0; j < coremap->total_frames; j++){
 				kprintf("%d", coremap->map[j]);
 			}
+			kprintf("\n");
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
@@ -169,14 +170,26 @@ void
 free_kpages(vaddr_t addr)
 {
 	/* nothing - leak the memory. */
+	kprintf("Coremap deallocated\n");
 
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
 	// Clear coremap
-	for(int i = 0; i < coremap->map[frame]; i++){
-		coremap->map[i] = 0;
+	int i = frame;
+	if(coremap->map[i] != 1){
+		kprintf("Cannot deallocate in the middle of a block\n");
 	}
+	i++;
+
+	while(coremap->map[i] == coremap->map[i - 1] + 1){
+		i++;
+	}
+
+	for(int f = frame; f < i; f++){
+		coremap->map[f] = 0;
+	}
+	
 }
 
 void
