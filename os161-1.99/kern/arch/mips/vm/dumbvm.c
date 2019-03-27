@@ -215,6 +215,9 @@ free_kpages(vaddr_t addr)
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
+	kprintf("addr: %d", addr);
+	kprintf("first addr: %d", coremap->firstaddr);
+	kprintf("feeling a little ballsy so how about this: %d", addr - 0x80000000);
 	kprintf("Deallocating starting from frame: %d", frame);
 
 	// Clear coremap
