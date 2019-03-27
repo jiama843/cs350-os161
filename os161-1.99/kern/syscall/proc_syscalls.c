@@ -1,10 +1,11 @@
 #include <types.h>
-#include <signal.h>
 #include <kern/errno.h>
 #include <kern/unistd.h>
 #include <kern/wait.h>
+#include <kern/fcntl.h>
 #include <mips/trapframe.h>
 #include <lib.h>
+#include <limits.h>
 #include <synch.h>
 #include <syscall.h>
 #include <current.h>
@@ -12,6 +13,7 @@
 #include <thread.h>
 #include <addrspace.h>
 #include <copyinout.h>
+#include <vfs.h>
 #include "opt-A3.h"
 
 #if OPT_A3
