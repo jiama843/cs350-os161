@@ -81,11 +81,11 @@ vm_bootstrap(void)
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
 	kprintf("Sets coremap values\n");
-	kprintf("PAGE_SIZE: %d", PAGE_SIZE);
-	kprintf("TOTAL FRAMES: %d", coremap->total_frames);
+	kprintf("PAGE_SIZE: %d\n", PAGE_SIZE);
+	kprintf("TOTAL FRAMES: %d\n", coremap->total_frames);
 
-	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(int));
-	kprintf("%d", coremap->map[0]);
+	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(int) + sizeof(bool) + sizeof(paddr_t) * 2);
+	kprintf("MAP LOCATION: %d\n", coremap->map[0]);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
 	}
