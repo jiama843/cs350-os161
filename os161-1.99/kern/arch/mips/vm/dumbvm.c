@@ -71,7 +71,7 @@ vm_bootstrap(void)
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
-	coremap->map = PADDR_TO_KVADDR(firstaddr);
+	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
 	}
@@ -125,6 +125,8 @@ alloc_kpages(int npages)
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
+
+		return 0; // Should return out of memory error
 	}
 	else{
 		paddr_t pa;
