@@ -118,7 +118,7 @@ struct coremap{
 	 */
 	int* map;
 
-	volatile bool allocated = false;
+	volatile bool allocated;// = false;
 	volatile int size;
 	volatile int total_frames;
 	volatile int remaining_frames;

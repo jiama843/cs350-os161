@@ -57,6 +57,8 @@ void
 vm_bootstrap(void)
 {
 	
+	coremap->allocated = false;
+
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
 
