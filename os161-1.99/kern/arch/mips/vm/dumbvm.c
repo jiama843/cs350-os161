@@ -135,7 +135,7 @@ getppages(unsigned long npages)
 			}
 			kprintf("\n");
 
-			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
+			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
 		kprintf("Coremap can't be allocated at this time\n");
@@ -191,7 +191,7 @@ alloc_kpages(int npages)
 			//kprintf("\n");
 
 			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
-			return coremap->firstaddr + i * PAGE_SIZE;
+			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
 		return 0; // Should return out of memory error
