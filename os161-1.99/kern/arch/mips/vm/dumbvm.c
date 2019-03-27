@@ -28,6 +28,7 @@
  */
 
 #include <types.h>
+#include <limits.h>
 #include <kern/errno.h>
 #include <lib.h>
 #include <spl.h>
@@ -36,6 +37,7 @@
 #include <current.h>
 #include <mips/tlb.h>
 #include <addrspace.h>
+#include <copyinout.h>
 #include <vm.h>
 
 /*
@@ -519,7 +521,7 @@ as_complete_load(struct addrspace *as)
 }
 
 int
-as_define_stack(struct addrspace *as, vaddr_t *stackptr)
+as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t argc)
 {
 	KASSERT(as->as_stackpbase != 0);
 
