@@ -128,8 +128,17 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
+			kprintf("Coremap allocated\n");
+
+			for(int j = 0; j < coremap->total_frames; j++){
+				kprintf("%d", coremap->map[j]);
+			}
+			kprintf("\n");
+
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
+
+		kprintf("Coremap can't be allocated at this time\n");
 
 		return 0;
 	}
@@ -153,7 +162,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		kprintf("Coremap allocated\n");
+		//kprintf("Coremap allocated\n");
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
