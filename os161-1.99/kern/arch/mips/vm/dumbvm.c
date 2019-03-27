@@ -78,6 +78,8 @@ vm_bootstrap(void)
 	//(coremap->total_frames * sizeof(int));
 
 	coremap->allocated = true;
+	
+	kprintf("Gets real sad cuz it doesn't make it here");
 }
 
 static
