@@ -99,7 +99,7 @@ vaddr_t
 alloc_kpages(int npages)
 {
 
-	// Check to see if using coremap (if so, never call getppages again)
+	/*// Check to see if using coremap (if so, never call getppages again)
 	if(coremap->allocated){
 
 		kprintf("Coremap allocated");
@@ -130,14 +130,14 @@ alloc_kpages(int npages)
 
 		return 0; // Should return out of memory error
 	}
-	else{
+	else{*/
 		paddr_t pa;
 		pa = getppages(npages);
 		if (pa==0) {
 			return 0;
 		}
 		return PADDR_TO_KVADDR(pa);
-	}
+	//}
 }
 
 void 

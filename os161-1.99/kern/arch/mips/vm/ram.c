@@ -45,9 +45,6 @@ static paddr_t lastpaddr;   /* one past end of last free physical page */
 void
 ram_bootstrap(void)
 {
-
-	kprintf("bootstrapping ram");
-
 	size_t ramsize;
 	
 	/* Get size of RAM. */
