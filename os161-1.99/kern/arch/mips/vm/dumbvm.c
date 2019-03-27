@@ -131,7 +131,7 @@ getppages(unsigned long npages)
 			kprintf("Coremap allocated\n");
 
 			for(int j = 0; j < coremap->total_frames; j++){
-				kprintf("%d", coremap->map[j]);
+				kprintf("%d ", coremap->map[j]);
 			}
 			kprintf("\n");
 
@@ -237,7 +237,7 @@ free_kpages(vaddr_t addr)
 	}
 
 	for(int j = 0; j < coremap->total_frames; j++){
-		kprintf("%d", coremap->map[j]);
+		kprintf("%d ", coremap->map[j]);
 	}
 	kprintf("\n");
 
