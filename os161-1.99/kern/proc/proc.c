@@ -146,6 +146,17 @@ proc_destroy(struct proc *proc)
 		proc->p_cwd = NULL;
 	}
 
+#if OPT_A3
+	kfree(proc->family);
+
+	if(proc->parent == NULL){
+		proc_destroy(proc->parent);
+	}
+	
+	lock_destroy(proc->pc_lock);
+	cv_destroy(proc->pc_cv);
+#endif
+
 #ifndef UW  // in the UW version, space destruction occurs in sys_exit, not here
 	if (proc->p_addrspace) {
 		/*
@@ -192,13 +203,6 @@ proc_destroy(struct proc *proc)
 	}
 	V(proc_count_mutex);
 #endif // UW
-	
-#if OPT_A3
-	kfree(proc->p_name);
-	as_destroy(proc->p_addrspace);
-	kfree(proc);
-#endif
-
 }
 
 /*
