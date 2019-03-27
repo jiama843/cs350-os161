@@ -72,7 +72,7 @@ vm_bootstrap(void)
 
 	coremap = (struct coremap *) PADDR_TO_KVADDR(firstaddr);
 
-	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
+	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int) + PAGE_SIZE, PAGE_SIZE); // Load coremap into first page and 
 
 	kprintf("NEW FIRST ADDR IS: %d\n", coremap->firstaddr);
 
