@@ -57,14 +57,14 @@ void
 vm_bootstrap(void)
 {
 
-	kprintf("Makes it here\n");
+	//kprintf("Makes it here\n");
 
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
 
-	kprintf("Gets RAMSIZE\n");
-	kprintf("FIRST ADDR IS: %d\n", firstaddr);
-	kprintf("LAST ADDR IS: %d\n", lastaddr);
+	//kprintf("Gets RAMSIZE\n");
+	//kprintf("FIRST ADDR IS: %d\n", firstaddr);
+	//kprintf("LAST ADDR IS: %d\n", lastaddr);
 
 	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
 
@@ -74,13 +74,13 @@ vm_bootstrap(void)
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
 
-	kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
+	//kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
 
 	coremap->lastaddr = lastaddr;
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
-	kprintf("Sets coremap values\n");
+	//kprintf("Sets coremap values\n");
 
 	//coremap->map;
 	//for(int i = 0; i < coremap->total_frames; i++){
@@ -90,7 +90,7 @@ vm_bootstrap(void)
 
 	coremap->allocated = true;
 
-	kprintf("Gets real sad cuz it doesn't make it here");
+	//kprintf("Gets real sad cuz it doesn't make it here");
 }
 
 static
@@ -112,7 +112,7 @@ vaddr_t
 alloc_kpages(int npages)
 {
 
-	/*// Check to see if using coremap (if so, never call getppages again)
+	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap->allocated){
 
 		kprintf("Coremap allocated");
@@ -143,7 +143,7 @@ alloc_kpages(int npages)
 
 		return 0; // Should return out of memory error
 	}
-	else{*/
+	else{
 		paddr_t pa;
 		pa = getppages(npages);
 		if (pa==0) {
