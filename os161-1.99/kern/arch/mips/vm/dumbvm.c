@@ -57,10 +57,14 @@ void
 vm_bootstrap(void)
 {
 
-	kprintf("Makes it here");
+	kprintf("Makes it here\n");
 
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
+
+	kprintf("Gets RAMSIZE\n");
+	kprintf("FIRST ADDR IS: %d\n", firstaddr);
+	kprintf("LAST ADDR IS: %d\n", lastaddr);
 
 	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
 
@@ -71,6 +75,8 @@ vm_bootstrap(void)
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
+	kprintf("Sets coremap values\n");
+
 	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
@@ -78,7 +84,7 @@ vm_bootstrap(void)
 	//(coremap->total_frames * sizeof(int));
 
 	coremap->allocated = true;
-	
+
 	kprintf("Gets real sad cuz it doesn't make it here");
 }
 
