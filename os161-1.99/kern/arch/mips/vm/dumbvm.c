@@ -105,14 +105,42 @@ static
 paddr_t
 getppages(unsigned long npages)
 {
-	paddr_t addr;
+	if(coremap != NULL && coremap->allocated){
 
-	spinlock_acquire(&stealmem_lock);
+		for(int i = 0; i < coremap->total_frames; i++){
 
-	addr = ram_stealmem(npages);
-	
-	spinlock_release(&stealmem_lock);
-	return addr;
+			// Check if there are npage contiguous frames available
+			bool can_alloc = true;
+			for(int seg_page = 0; seg_page < npages; seg_page++){
+				if(coremap->map[i + seg_page] != 0){
+					can_alloc = false;
+					break;
+				}
+			}
+
+			if(!can_alloc){
+				i += npages;
+				continue;
+			}
+
+			// if can_alloc, we alloc
+			for(int seg_page = 0; seg_page < npages; seg_page++){
+				coremap->map[i + seg_page] = seg_page + 1;
+			}
+
+			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
+		}
+	}
+	else{
+		paddr_t addr;
+
+		spinlock_acquire(&stealmem_lock);
+
+		addr = ram_stealmem(npages);
+		
+		spinlock_release(&stealmem_lock);
+		return addr;
+	}
 }
 
 /* Allocate/free some kernel-space virtual pages */
@@ -189,7 +217,7 @@ free_kpages(vaddr_t addr)
 	for(int f = frame; f < i; f++){
 		coremap->map[f] = 0;
 	}
-	
+
 }
 
 void
