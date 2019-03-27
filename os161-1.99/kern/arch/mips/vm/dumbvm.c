@@ -62,9 +62,9 @@ vm_bootstrap(void)
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
 
-	//kprintf("Gets RAMSIZE\n");
-	//kprintf("FIRST ADDR IS: %d\n", firstaddr);
-	//kprintf("LAST ADDR IS: %d\n", lastaddr);
+	kprintf("Gets RAMSIZE\n");
+	kprintf("FIRST ADDR IS: %d\n", firstaddr);
+	kprintf("LAST ADDR IS: %d\n", lastaddr);
 
 	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
 
@@ -74,18 +74,18 @@ vm_bootstrap(void)
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
 
-	//kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
+	kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
 
 	coremap->lastaddr = lastaddr;
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr)/ 1024 / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
-	//kprintf("Sets coremap values\n");
+	kprintf("Sets coremap values\n");
 
 	//coremap->map;
-	//for(int i = 0; i < coremap->total_frames; i++){
-	//	coremap->map[i] = 0;
-	//}
+	for(int i = 0; i < coremap->total_frames; i++){
+		coremap->map[i] = 0;
+	}
 	//(coremap->total_frames * sizeof(int));
 
 	coremap->allocated = true;
