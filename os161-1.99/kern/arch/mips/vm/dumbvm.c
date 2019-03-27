@@ -70,7 +70,7 @@ vm_bootstrap(void)
 
 	int num_coremap_frames = (lastaddr - firstaddr)/ 1024 / PAGE_SIZE;
 
-	coremap = (coremap *) PADDR_TO_KVADDR(firstaddr);
+	coremap = (struct coremap *) PADDR_TO_KVADDR(firstaddr);
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
 
