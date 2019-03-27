@@ -70,6 +70,8 @@ vm_bootstrap(void)
 
 	int num_coremap_frames = (lastaddr - firstaddr)/ 1024 / PAGE_SIZE;
 
+	&coremap = PADDR_TO_KVADDR(firstaddr);
+
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int), PAGE_SIZE); // Load coremap into first page and 
 
 	kprintf("NEW FIRST ADDR IS: %d\n", firstaddr);
@@ -80,10 +82,10 @@ vm_bootstrap(void)
 
 	kprintf("Sets coremap values\n");
 
-	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr);
-	for(int i = 0; i < coremap->total_frames; i++){
-		coremap->map[i] = 0;
-	}
+	//coremap->map;
+	//for(int i = 0; i < coremap->total_frames; i++){
+	//	coremap->map[i] = 0;
+	//}
 	//(coremap->total_frames * sizeof(int));
 
 	coremap->allocated = true;
