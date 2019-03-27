@@ -143,7 +143,7 @@ alloc_kpages(int npages)
 
 			// if can_alloc, we alloc
 			for(int seg_page = 0; seg_page < npages; seg_page++){
-				coremap->map[i + seg_page] = seg_page;
+				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
 			for(int j = 0; j < coremap->total_frames; j++){
