@@ -88,7 +88,7 @@ vm_bootstrap(void)
 	//}
 	//(coremap->total_frames * sizeof(int));
 
-	coremap->allocated = true;
+	coremap->allocated = false;
 
 	//kprintf("Gets real sad cuz it doesn't make it here");
 }
@@ -113,7 +113,7 @@ alloc_kpages(int npages)
 {
 
 	// Check to see if using coremap (if so, never call getppages again)
-	if(false){
+	if(!coremap->allocated){
 
 		//kprintf("Coremap allocated");
 
