@@ -167,7 +167,7 @@ alloc_kpages(int npages)
 			}
 
 			if(!can_alloc){
-				i += npages;
+				i += npages - 1;
 				continue;
 			}
 
