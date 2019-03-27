@@ -81,6 +81,7 @@ vm_bootstrap(void)
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
 	kprintf("Sets coremap values\n");
+	kprintf("PAGE_SIZE: %d", PAGE_SIZE);
 	kprintf("TOTAL FRAMES: %d", coremap->total_frames);
 
 	//coremap->map;
