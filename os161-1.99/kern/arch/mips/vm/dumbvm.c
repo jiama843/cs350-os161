@@ -135,6 +135,7 @@ getppages(unsigned long npages)
 			}
 			kprintf("\n");
 
+			kprintf("%d", (paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
