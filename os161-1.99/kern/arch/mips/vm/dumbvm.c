@@ -86,7 +86,7 @@ vm_bootstrap(void)
 
 	kprintf("MAP LOCATION: %d\n", firstaddr + sizeof(paddr_t) * 5);
 	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(paddr_t) * 5);
-	kprintf("First value: %d\n", coremap->map[0]);
+	//kprintf("First value: %d\n", coremap->map[0]);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
 	}
@@ -123,7 +123,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		kprintf("Coremap allocated");
+		kprintf("Coremap allocated\n");
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -144,6 +144,10 @@ alloc_kpages(int npages)
 			// if can_alloc, we alloc
 			for(int seg_page = 0; seg_page < npages; seg_page++){
 				coremap->map[i + seg_page] = seg_page;
+			}
+
+			for(int j = 0; j < coremap->total_frames; j++){
+				kprintf("%d", coremap->map[j]);
 			}
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
