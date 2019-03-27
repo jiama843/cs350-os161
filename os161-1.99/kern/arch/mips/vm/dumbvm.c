@@ -85,7 +85,7 @@ vm_bootstrap(void)
 	kprintf("TOTAL FRAMES: %d", coremap->total_frames);
 
 	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(int));
-	kprintf(%d, coremap->map[0]);
+	kprintf("%d", coremap->map[0]);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
 	}
