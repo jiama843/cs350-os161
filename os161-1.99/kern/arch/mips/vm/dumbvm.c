@@ -181,16 +181,16 @@ alloc_kpages(int npages)
 			}
 
 			// if can_alloc, we alloc
-			for(int seg_page = 0; seg_page < npages; seg_page++){
-				coremap->map[i + seg_page] = seg_page + 1;
-			}
+			//for(int seg_page = 0; seg_page < npages; seg_page++){
+			//	coremap->map[i + seg_page] = seg_page + 1;
+			//}
 
-			for(int j = 0; j < coremap->total_frames; j++){
-				kprintf("%d", coremap->map[j]);
-			}
-			kprintf("\n");
+			//for(int j = 0; j < coremap->total_frames; j++){
+			//	kprintf("%d", coremap->map[j]);
+			//}
+			//kprintf("\n");
 
-			kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
+			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
@@ -214,6 +214,8 @@ free_kpages(vaddr_t addr)
 
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
+
+	kprintf("Deallocating starting from frame: %d", frame);
 
 	// Clear coremap
 	int i = frame;
