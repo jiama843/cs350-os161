@@ -150,11 +150,9 @@ proc_destroy(struct proc *proc)
 	kfree(proc->family);
 
 	if(proc->parent == NULL){
-		proc_destroy(proc->parent);
+		lock_destroy(proc->pc_lock);
+		cv_destroy(proc->pc_cv);
 	}
-	
-	lock_destroy(proc->pc_lock);
-	cv_destroy(proc->pc_cv);
 #endif
 
 #ifndef UW  // in the UW version, space destruction occurs in sys_exit, not here
