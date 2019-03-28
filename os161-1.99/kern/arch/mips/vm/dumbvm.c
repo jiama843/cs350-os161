@@ -27,6 +27,7 @@
  * SUCH DAMAGE.
  */
 
+#include <synch.h>
 #include <types.h>
 #include <limits.h>
 #include <kern/errno.h>
