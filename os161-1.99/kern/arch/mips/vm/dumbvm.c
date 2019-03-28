@@ -69,9 +69,9 @@ vm_bootstrap(void)
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
 
-	kprintf("Gets RAMSIZE\n");
-	kprintf("FIRST ADDR IS: %d\n", firstaddr);
-	kprintf("LAST ADDR IS: %d\n", lastaddr);
+	//kprintf("Gets RAMSIZE\n");
+	//kprintf("FIRST ADDR IS: %d\n", firstaddr);
+	//kprintf("LAST ADDR IS: %d\n", lastaddr);
 
 	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
 
@@ -81,17 +81,17 @@ vm_bootstrap(void)
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int) + PAGE_SIZE, PAGE_SIZE); // Load coremap into first page and 
 
-	kprintf("NEW FIRST ADDR IS: %d\n", coremap->firstaddr);
+	//kprintf("NEW FIRST ADDR IS: %d\n", coremap->firstaddr);
 
 	coremap->lastaddr = lastaddr;
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr) / PAGE_SIZE;
 	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
-	kprintf("Sets coremap values\n");
-	kprintf("PAGE_SIZE: %d\n", PAGE_SIZE);
-	kprintf("TOTAL FRAMES: %d\n", coremap->total_frames);
+	//kprintf("Sets coremap values\n");
+	//kprintf("PAGE_SIZE: %d\n", PAGE_SIZE);
+	//kprintf("TOTAL FRAMES: %d\n", coremap->total_frames);
 
-	kprintf("MAP LOCATION: %d\n", firstaddr + sizeof(paddr_t) * 5);
+	//kprintf("MAP LOCATION: %d\n", firstaddr + sizeof(paddr_t) * 5);
 	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(paddr_t) * 5);
 	//kprintf("First value: %d\n", coremap->map[0]);
 	for(int i = 0; i < coremap->total_frames; i++){
@@ -138,12 +138,12 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			kprintf("Coremap allocated\n");
+			//kprintf("Coremap allocated\n");
 
-			for(int j = 0; j < coremap->total_frames; j++){
-				kprintf("%d ", coremap->map[j]);
-			}
-			kprintf("\n");
+			//for(int j = 0; j < coremap->total_frames; j++){
+			//	kprintf("%d ", coremap->map[j]);
+			//}
+			//kprintf("\n");
 
 			//lock_release(coremap_lock);
 			spinlock_release(&coremap_lock);
@@ -151,7 +151,7 @@ getppages(unsigned long npages)
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
-		kprintf("Coremap can't be allocated at this time\n");
+		//kprintf("Coremap can't be allocated at this time\n");
 		//lock_release(coremap_lock);
 		spinlock_release(&coremap_lock);
 		
@@ -233,7 +233,7 @@ void
 free_kpages(vaddr_t addr)
 {
 	/* nothing - leak the memory. */
-	kprintf("Coremap deallocated\n");
+	//kprintf("Coremap deallocated\n");
 
 	//lock_acquire(coremap_lock);
 	spinlock_acquire(&coremap_lock);
@@ -241,10 +241,10 @@ free_kpages(vaddr_t addr)
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
-	kprintf("addr: %d\n", addr);
-	kprintf("first addr: %d\n", coremap->firstaddr);
-	kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
-	kprintf("Deallocating starting from frame: %d\n", frame);
+	//kprintf("addr: %d\n", addr);
+	//kprintf("first addr: %d\n", coremap->firstaddr);
+	//kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
+	//kprintf("Deallocating starting from frame: %d\n", frame);
 
 	// Clear coremap
 	int i = frame;
@@ -261,10 +261,10 @@ free_kpages(vaddr_t addr)
 		coremap->map[f] = 0;
 	}
 
-	for(int j = 0; j < coremap->total_frames; j++){
-		kprintf("%d ", coremap->map[j]);
-	}
-	kprintf("\n");
+	//for(int j = 0; j < coremap->total_frames; j++){
+	//	kprintf("%d ", coremap->map[j]);
+	//}
+	//kprintf("\n");
 
 	//lock_release(coremap_lock);
 	spinlock_release(&coremap_lock);
