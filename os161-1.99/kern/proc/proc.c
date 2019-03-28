@@ -147,9 +147,8 @@ proc_destroy(struct proc *proc)
 	}
 
 #if OPT_A3
-	kfree(proc->family);
-
 	if(proc->parent == NULL){
+		kfree(proc->family);
 		lock_destroy(proc->pc_lock);
 		cv_destroy(proc->pc_cv);
 	}
