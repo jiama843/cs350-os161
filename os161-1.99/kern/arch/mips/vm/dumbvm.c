@@ -63,17 +63,8 @@ void
 vm_bootstrap(void)
 {
 
-	//coremap_lock = lock_create("core_lock");
-	//kprintf("Makes it here\n");
-
 	paddr_t firstaddr, lastaddr;
 	ram_getsize(&firstaddr, &lastaddr);
-
-	//kprintf("Gets RAMSIZE\n");
-	//kprintf("FIRST ADDR IS: %d\n", firstaddr);
-	//kprintf("LAST ADDR IS: %d\n", lastaddr);
-
-	//coremap->size = (lastaddr - firstaddr)/ (PAGE_SIZE + sizeof(int));
 
 	int num_coremap_frames = (lastaddr - firstaddr)/ 1024 / PAGE_SIZE;
 
@@ -81,31 +72,15 @@ vm_bootstrap(void)
 
 	coremap->firstaddr = ROUNDUP(firstaddr + num_coremap_frames * sizeof(int) + PAGE_SIZE, PAGE_SIZE); // Load coremap into first page and 
 
-	//kprintf("NEW FIRST ADDR IS: %d\n", coremap->firstaddr);
-
 	coremap->lastaddr = lastaddr;
 	coremap->total_frames = (coremap->lastaddr - coremap->firstaddr) / PAGE_SIZE;
-	//coremap->remaining_frames = coremap->total_frames - (coremap->total_frames * sizeof(int));
 
-	//kprintf("Sets coremap values\n");
-	//kprintf("PAGE_SIZE: %d\n", PAGE_SIZE);
-	//kprintf("TOTAL FRAMES: %d\n", coremap->total_frames);
-
-	//kprintf("MAP LOCATION: %d\n", firstaddr + sizeof(paddr_t) * 5);
 	coremap->map = (int *) PADDR_TO_KVADDR(firstaddr + sizeof(paddr_t) * 5);
-	//kprintf("First value: %d\n", coremap->map[0]);
 	for(int i = 0; i < coremap->total_frames; i++){
 		coremap->map[i] = 0;
 	}
-	//(coremap->total_frames * sizeof(int));
-
-	/*for(int i = 0; i < coremap->total_frames; i++){
-		kprintf("%d", coremap->map[i]);
-	}*/
 
 	coremap->allocated = true;
-
-	//kprintf("Gets real sad cuz it doesn't make it here");
 }
 
 static
@@ -114,8 +89,6 @@ getppages(unsigned long npages)
 {
 	if(coremap != NULL && coremap->allocated){
 
-		//lock_acquire(coremap_lock);
-		
 		spinlock_acquire(&coremap_lock);
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -129,7 +102,6 @@ getppages(unsigned long npages)
 			}
 
 			if(!can_alloc){
-				//i += npages;
 				continue;
 			}
 
@@ -138,21 +110,10 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			//kprintf("Coremap allocated\n");
-
-			//for(int j = 0; j < coremap->total_frames; j++){
-			//	kprintf("%d ", coremap->map[j]);
-			//}
-			//kprintf("\n");
-
-			//lock_release(coremap_lock);
 			spinlock_release(&coremap_lock);
-			//kprintf("%d\n", (paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
-		//kprintf("Coremap can't be allocated at this time\n");
-		//lock_release(coremap_lock);
 		spinlock_release(&coremap_lock);
 		
 		return 0;
@@ -177,8 +138,6 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		//kprintf("Coremap allocated\n");
-		//lock_acquire(coremap_lock);
 		spinlock_acquire(&coremap_lock);
 
 		for(int i = 0; i < coremap->total_frames; i++){
@@ -193,7 +152,6 @@ alloc_kpages(int npages)
 			}
 
 			if(!can_alloc){
-				//i += npages - 1;
 				continue;
 			}
 
@@ -202,19 +160,11 @@ alloc_kpages(int npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			//for(int j = 0; j < coremap->total_frames; j++){
-			//	kprintf("%d", coremap->map[j]);
-			//}
-			//kprintf("\n");
-
-			//lock_release(coremap_lock);
 			spinlock_release(&coremap_lock);
 
-			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
-		//lock_release(coremap_lock);
 		spinlock_release(&coremap_lock);
 
 		return 0; // Should return out of memory error
@@ -232,19 +182,10 @@ alloc_kpages(int npages)
 void 
 free_kpages(vaddr_t addr)
 {
-	/* nothing - leak the memory. */
-	//kprintf("Coremap deallocated\n");
 
-	//lock_acquire(coremap_lock);
 	spinlock_acquire(&coremap_lock);
 
-	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
-
-	//kprintf("addr: %d\n", addr);
-	//kprintf("first addr: %d\n", coremap->firstaddr);
-	//kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
-	//kprintf("Deallocating starting from frame: %d\n", frame);
 
 	// Clear coremap
 	int i = frame;
@@ -260,11 +201,6 @@ free_kpages(vaddr_t addr)
 	for(int f = frame; f < i; f++){
 		coremap->map[f] = 0;
 	}
-
-	//for(int j = 0; j < coremap->total_frames; j++){
-	//	kprintf("%d ", coremap->map[j]);
-	//}
-	//kprintf("\n");
 
 	//lock_release(coremap_lock);
 	spinlock_release(&coremap_lock);
@@ -329,17 +265,17 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 
 	/* Assert that the address space has been set up properly. */
 	KASSERT(as->as_vbase1 != 0);
-	KASSERT(as->as_pbase1 != 0);
+	KASSERT(as->as_ptable1 != NULL);
 	KASSERT(as->as_npages1 != 0);
 	KASSERT(as->as_vbase2 != 0);
-	KASSERT(as->as_pbase2 != 0);
+	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_npages2 != 0);
-	KASSERT(as->as_stackpbase != 0);
+	KASSERT(as->as_pstacktable != NULL);
 	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
-	KASSERT((as->as_pbase1 & PAGE_FRAME) == as->as_pbase1);
+	KASSERT((as->as_ptable1 & PAGE_FRAME) == as->as_ptable1);
 	KASSERT((as->as_vbase2 & PAGE_FRAME) == as->as_vbase2);
-	KASSERT((as->as_pbase2 & PAGE_FRAME) == as->as_pbase2);
-	KASSERT((as->as_stackpbase & PAGE_FRAME) == as->as_stackpbase);
+	KASSERT((as->as_ptable2 & PAGE_FRAME) == as->as_ptable2);
+	KASSERT((as->as_pstacktable & PAGE_FRAME) == as->as_pstacktable);
 
 	vbase1 = as->as_vbase1;
 	vtop1 = vbase1 + as->as_npages1 * PAGE_SIZE;
@@ -349,13 +285,13 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	stacktop = USERSTACK;
 
 	if (faultaddress >= vbase1 && faultaddress < vtop1) {
-		paddr = (faultaddress - vbase1) + as->as_pbase1;
+		paddr = (faultaddress - vbase1) + as->as_ptable1[0];
 	}
 	else if (faultaddress >= vbase2 && faultaddress < vtop2) {
-		paddr = (faultaddress - vbase2) + as->as_pbase2;
+		paddr = (faultaddress - vbase2) + as->as_ptable2[0];
 	}
 	else if (faultaddress >= stackbase && faultaddress < stacktop) {
-		paddr = (faultaddress - stackbase) + as->as_stackpbase;
+		paddr = (faultaddress - stackbase) + as->as_pstacktable[0];
 	}
 	else {
 		return EFAULT;
@@ -415,12 +351,12 @@ as_create(void)
 
 	as->done_load_elf = false;
 	as->as_vbase1 = 0;
-	as->as_pbase1 = 0;
+	as->as_ptable1 = NULL;
 	as->as_npages1 = 0;
 	as->as_vbase2 = 0;
-	as->as_pbase2 = 0;
+	as->as_ptable2 = NULL;
 	as->as_npages2 = 0;
-	as->as_stackpbase = 0;
+	as->as_pstacktable = NULL;
 
 	return as;
 }
@@ -428,9 +364,21 @@ as_create(void)
 void
 as_destroy(struct addrspace *as)
 {
-	free_kpages(PADDR_TO_KVADDR(as->as_pbase1));
-	free_kpages(PADDR_TO_KVADDR(as->as_pbase2));
-	free_kpages(PADDR_TO_KVADDR(as->as_stackpbase));
+	/*for(int i = 0; i < as->as_npages1; i++){
+		free_kpages(PADDR_TO_KVADDR(as->as_ptable1[i]));
+	}
+
+	for(int i = 0; i < as->as_npages2; i++){
+		free_kpages(PADDR_TO_KVADDR(as->as_ptable2[i]));
+	}
+
+	for(int i = 0; i < DUMBVM_STACKPAGES; i++){
+		free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[i]));
+	}*/
+
+	free_kpages(PADDR_TO_KVADDR(as->as_ptable1));
+	free_kpages(PADDR_TO_KVADDR(as->as_ptable2));
+	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable));
 	kfree(as);
 }
 
@@ -480,19 +428,23 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	npages = sz / PAGE_SIZE;
 
 	/* We don't use these - all pages are read-write */
-	(void)readable;
-	(void)writeable;
+	//(void)readable;
+	//(void)writeable;
 	(void)executable;
 
 	if (as->as_vbase1 == 0) {
 		as->as_vbase1 = vaddr;
 		as->as_npages1 = npages;
+		as->as_ptable1 = kmalloc(sz * sizeof(paddr_t));//sizeof(paddr_t*));
+		//as->as_ptable1[0] = readable;
 		return 0;
 	}
 
 	if (as->as_vbase2 == 0) {
 		as->as_vbase2 = vaddr;
 		as->as_npages2 = npages;
+		as->as_ptable2 = kmalloc(sz * sizeof(paddr_t));//sizeof(paddr_t*));
+		//as->as_ptable2[0] = writeable;
 		return 0;
 	}
 
@@ -517,24 +469,34 @@ as_prepare_load(struct addrspace *as)
 	KASSERT(as->as_pbase2 == 0);
 	KASSERT(as->as_stackpbase == 0);
 
-	as->as_pbase1 = getppages(as->as_npages1);
-	if (as->as_pbase1 == 0) {
+	paddr_t pbase1 = getppages(as->as_npages1);
+	for(int i = 0; i < as->as_npages1; i++){
+		as->as_ptable1[i] = pbase1 + (i * PAGE_SIZE);
+	}
+	if (as->as_ptable1 == 0) {
 		return ENOMEM;
 	}
 
-	as->as_pbase2 = getppages(as->as_npages2);
-	if (as->as_pbase2 == 0) {
+	paddr_t pbase2 = getppages(as->as_npages2);
+	for(int i = 0; i < as->as_npages2; i++){
+		as->as_ptable2[i] = pbase2 + (i * PAGE_SIZE);
+	}
+	if (as->as_ptable2 == NULL) {
 		return ENOMEM;
 	}
 
-	as->as_stackpbase = getppages(DUMBVM_STACKPAGES);
-	if (as->as_stackpbase == 0) {
+	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * sizeof(paddr_t));
+	paddr_t stackpbase = getppages(DUMBVM_STACKPAGES);
+	for(int i = 0; i < DUMBVM_STACKPAGES; i++){
+		as->as_pstacktable[i] = stackpbase + (i * PAGE_SIZE);
+	}
+	if (as->as_pstacktable == NULL) {
 		return ENOMEM;
 	}
 	
-	as_zero_region(as->as_pbase1, as->as_npages1);
-	as_zero_region(as->as_pbase2, as->as_npages2);
-	as_zero_region(as->as_stackpbase, DUMBVM_STACKPAGES);
+	as_zero_region(as->as_ptable1, as->as_npages1);
+	as_zero_region(as->as_ptable2, as->as_npages2);
+	as_zero_region(as->as_pstacktable, DUMBVM_STACKPAGES);
 
 	return 0;
 }
@@ -616,18 +578,24 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 	KASSERT(new->as_pbase2 != 0);
 	KASSERT(new->as_stackpbase != 0);
 
-	memmove((void *)PADDR_TO_KVADDR(new->as_pbase1),
-		(const void *)PADDR_TO_KVADDR(old->as_pbase1),
-		old->as_npages1*PAGE_SIZE);
+	for (int i = 0; i < new->as_npages1; i++){
+		memmove((void *)PADDR_TO_KVADDR(new->as_ptable1[i]),
+			(const void *)PADDR_TO_KVADDR(old->as_ptable1[i]),
+			PAGE_SIZE);
+	}
 
-	memmove((void *)PADDR_TO_KVADDR(new->as_pbase2),
-		(const void *)PADDR_TO_KVADDR(old->as_pbase2),
-		old->as_npages2*PAGE_SIZE);
+	for (int i = 0; i < new->as_npages2; i++){
+		memmove((void *)PADDR_TO_KVADDR(new->as_ptable2[i]),
+			(const void *)PADDR_TO_KVADDR(old->as_ptable2[i]),
+			PAGE_SIZE);
+	}
 
-	memmove((void *)PADDR_TO_KVADDR(new->as_stackpbase),
-		(const void *)PADDR_TO_KVADDR(old->as_stackpbase),
-		DUMBVM_STACKPAGES*PAGE_SIZE);
-	
+	for (int i = 0; i < DUMBVM_STACKPAGES; i++){
+		memmove((void *)PADDR_TO_KVADDR(new->as_pstacktable[i]),
+			(const void *)PADDR_TO_KVADDR(old->as_pstacktable[i]),
+			PAGE_SIZE);
+	}
+
 	*ret = new;
 	return 0;
 }
