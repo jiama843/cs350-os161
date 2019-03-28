@@ -148,7 +148,7 @@ proc_destroy(struct proc *proc)
 
 #if OPT_A3
 	//array_cleanup(proc->family);
-	array_destroy(proc->family);
+	//array_destroy(proc->family);
 
 	if(proc->parent == NULL){
 		lock_destroy(proc->pc_lock);
