@@ -33,7 +33,6 @@
 #include <kern/errno.h>
 #include <lib.h>
 #include <spl.h>
-#include <spinlock.h>
 #include <proc.h>
 #include <current.h>
 #include <mips/tlb.h>
@@ -148,7 +147,7 @@ getppages(unsigned long npages)
 		}
 
 		kprintf("Coremap can't be allocated at this time\n");
-		lock_release(&coremap_lock);
+		lock_release(coremap_lock);
 
 		return 0;
 	}
@@ -201,7 +200,7 @@ alloc_kpages(int npages)
 			//}
 			//kprintf("\n");
 
-			lock_release(&coremap_lock);
+			lock_release(coremap_lock);
 
 			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
