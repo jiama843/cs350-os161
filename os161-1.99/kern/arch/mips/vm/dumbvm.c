@@ -33,6 +33,7 @@
 #include <kern/errno.h>
 #include <lib.h>
 #include <spl.h>
+#include <spinlock.h>
 #include <proc.h>
 #include <current.h>
 #include <mips/tlb.h>
@@ -53,7 +54,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-static struct lock * coremap_lock;
+static struct lock * coremap_lock = NULL;
 
 static struct coremap* coremap; /* Store coremap */
 
