@@ -110,7 +110,7 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			spinlock_release(&coremap_lock);
+			//spinlock_release(&coremap_lock);
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
@@ -160,7 +160,7 @@ alloc_kpages(int npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			spinlock_release(&coremap_lock);
+			//spinlock_release(&coremap_lock);
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
