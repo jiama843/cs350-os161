@@ -54,7 +54,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-//static struct spinlock coremap_lock = SPINLOCK_INITIALIZER;
+static struct spinlock coremap_lock = SPINLOCK_INITIALIZER;
 //static struct lock *coremap_lock;
 
 static struct coremap* coremap; /* Store coremap */
@@ -89,7 +89,7 @@ getppages(unsigned long npages)
 {
 	if(coremap != NULL && coremap->allocated){
 
-		//spinlock_acquire(&coremap_lock);
+		spinlock_acquire(&coremap_lock);
 		for(int i = 0; i < coremap->total_frames; i++){
 
 			// Check if there are npage contiguous frames available
@@ -110,11 +110,11 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			//spinlock_release(&coremap_lock);
+			spinlock_release(&coremap_lock);
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
-		//spinlock_release(&coremap_lock);
+		spinlock_release(&coremap_lock);
 		
 		return 0;
 	}
@@ -138,7 +138,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		//spinlock_acquire(&coremap_lock);
+		spinlock_acquire(&coremap_lock);
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -160,12 +160,12 @@ alloc_kpages(int npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			//spinlock_release(&coremap_lock);
+			spinlock_release(&coremap_lock);
 
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
-		//spinlock_release(&coremap_lock);
+		spinlock_release(&coremap_lock);
 
 		return 0; // Should return out of memory error
 	}
@@ -183,7 +183,7 @@ void
 free_kpages(vaddr_t addr)
 {
 
-	//spinlock_acquire(&coremap_lock);
+	spinlock_acquire(&coremap_lock);
 
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
@@ -203,7 +203,7 @@ free_kpages(vaddr_t addr)
 	}
 
 	//lock_release(coremap_lock);
-	//spinlock_release(&coremap_lock);
+	spinlock_release(&coremap_lock);
 }
 
 void
@@ -268,7 +268,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	KASSERT(as->as_ptable1 != NULL);
 	KASSERT(as->as_npages1 != 0);
 	KASSERT(as->as_vbase2 != 0);
-	KASSERT(as->as_ptable2 != NULL);
+	//KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_npages2 != 0);
 	KASSERT(as->as_pstacktable != NULL);
 	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
