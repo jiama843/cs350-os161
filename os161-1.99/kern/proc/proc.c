@@ -147,11 +147,13 @@ proc_destroy(struct proc *proc)
 	}
 
 #if OPT_A3
-	/*if(proc->parent == NULL){
-		kfree(proc->family);
+	//array_cleanup(proc->family);
+	array_destroy(proc->family);
+
+	if(proc->parent == NULL){
 		lock_destroy(proc->pc_lock);
 		cv_destroy(proc->pc_cv);
-	}*/
+	}
 #endif
 
 #ifndef UW  // in the UW version, space destruction occurs in sys_exit, not here
