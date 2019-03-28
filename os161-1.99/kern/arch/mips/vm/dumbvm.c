@@ -89,7 +89,7 @@ getppages(unsigned long npages)
 {
 	if(coremap != NULL && coremap->allocated){
 
-		spinlock_acquire(&coremap_lock);
+		//spinlock_acquire(&coremap_lock);
 		for(int i = 0; i < coremap->total_frames; i++){
 
 			// Check if there are npage contiguous frames available
@@ -114,7 +114,7 @@ getppages(unsigned long npages)
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
-		spinlock_release(&coremap_lock);
+		//spinlock_release(&coremap_lock);
 		
 		return 0;
 	}
@@ -138,7 +138,7 @@ alloc_kpages(int npages)
 	// Check to see if using coremap (if so, never call getppages again)
 	if(coremap != NULL && coremap->allocated){
 
-		spinlock_acquire(&coremap_lock);
+		//spinlock_acquire(&coremap_lock);
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -165,7 +165,7 @@ alloc_kpages(int npages)
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
-		spinlock_release(&coremap_lock);
+		//spinlock_release(&coremap_lock);
 
 		return 0; // Should return out of memory error
 	}
@@ -183,7 +183,7 @@ void
 free_kpages(vaddr_t addr)
 {
 
-	spinlock_acquire(&coremap_lock);
+	//spinlock_acquire(&coremap_lock);
 
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
@@ -203,7 +203,7 @@ free_kpages(vaddr_t addr)
 	}
 
 	//lock_release(coremap_lock);
-	spinlock_release(&coremap_lock);
+	//spinlock_release(&coremap_lock);
 }
 
 void
