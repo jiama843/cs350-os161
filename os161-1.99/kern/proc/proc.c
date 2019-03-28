@@ -182,9 +182,9 @@ proc_destroy(struct proc *proc)
 	}
 #endif // UW
 
-	while(threadarray_num(&proc->p_threads) != 0){
+	/*while(threadarray_num(&proc->p_threads) != 0){
 		threadarray_remove(&proc->p_threads, 0);
-	}
+	}*/
 
 	threadarray_cleanup(&proc->p_threads);
 	spinlock_cleanup(&proc->p_lock);
