@@ -27,12 +27,13 @@
  * SUCH DAMAGE.
  */
 
-#include <synch.h>
+//#include <synch.h>
 #include <types.h>
 #include <limits.h>
 #include <kern/errno.h>
 #include <lib.h>
 #include <spl.h>
+#include <spinlock.h>
 #include <proc.h>
 #include <current.h>
 #include <mips/tlb.h>
@@ -53,7 +54,8 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-static struct lock *coremap_lock;
+static struct spinlock coremap_lock = SPINLOCK_INITIALIZER;
+//static struct lock *coremap_lock;
 
 static struct coremap* coremap; /* Store coremap */
 
@@ -61,7 +63,7 @@ void
 vm_bootstrap(void)
 {
 
-	coremap_lock = lock_create("core_lock");
+	//coremap_lock = lock_create("core_lock");
 	//kprintf("Makes it here\n");
 
 	paddr_t firstaddr, lastaddr;
@@ -112,7 +114,9 @@ getppages(unsigned long npages)
 {
 	if(coremap != NULL && coremap->allocated){
 
-		lock_acquire(coremap_lock);
+		//lock_acquire(coremap_lock);
+		
+		spinlock_acquire(&coremap_lock);
 		for(int i = 0; i < coremap->total_frames; i++){
 
 			// Check if there are npage contiguous frames available
@@ -141,14 +145,16 @@ getppages(unsigned long npages)
 			}
 			kprintf("\n");
 
-			lock_release(coremap_lock);
+			//lock_release(coremap_lock);
+			spinlock_release(&coremap_lock);
 			//kprintf("%d\n", (paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
 		kprintf("Coremap can't be allocated at this time\n");
-		lock_release(coremap_lock);
-
+		//lock_release(coremap_lock);
+		spinlock_release(&coremap_lock);
+		
 		return 0;
 	}
 	else{
@@ -172,7 +178,8 @@ alloc_kpages(int npages)
 	if(coremap != NULL && coremap->allocated){
 
 		//kprintf("Coremap allocated\n");
-		lock_acquire(coremap_lock);
+		//lock_acquire(coremap_lock);
+		spinlock_acquire(&coremap_lock);
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -200,13 +207,15 @@ alloc_kpages(int npages)
 			//}
 			//kprintf("\n");
 
-			lock_release(coremap_lock);
+			//lock_release(coremap_lock);
+			spinlock_release(&coremap_lock);
 
 			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
 
-		lock_release(coremap_lock);
+		//lock_release(coremap_lock);
+		spinlock_release(&coremap_lock);
 
 		return 0; // Should return out of memory error
 	}
@@ -226,7 +235,8 @@ free_kpages(vaddr_t addr)
 	/* nothing - leak the memory. */
 	kprintf("Coremap deallocated\n");
 
-	lock_acquire(coremap_lock);
+	//lock_acquire(coremap_lock);
+	spinlock_acquire(&coremap_lock);
 
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
@@ -256,7 +266,8 @@ free_kpages(vaddr_t addr)
 	}
 	kprintf("\n");
 
-	lock_release(coremap_lock);
+	//lock_release(coremap_lock);
+	spinlock_release(&coremap_lock);
 }
 
 void
