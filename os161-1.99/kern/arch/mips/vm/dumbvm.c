@@ -272,10 +272,10 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	KASSERT(as->as_npages2 != 0);
 	KASSERT(as->as_pstacktable != NULL);
 	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
-	KASSERT((as->as_ptable1 & PAGE_FRAME) == as->as_ptable1);
+	KASSERT((as->as_ptable1[0] & PAGE_FRAME) == as->as_ptable1[0]);
 	KASSERT((as->as_vbase2 & PAGE_FRAME) == as->as_vbase2);
-	KASSERT((as->as_ptable2 & PAGE_FRAME) == as->as_ptable2);
-	KASSERT((as->as_pstacktable & PAGE_FRAME) == as->as_pstacktable);
+	KASSERT((as->as_ptable2[0] & PAGE_FRAME) == as->as_ptable2[0]);
+	KASSERT((as->as_pstacktable[0] & PAGE_FRAME) == as->as_pstacktable[0]);
 
 	vbase1 = as->as_vbase1;
 	vtop1 = vbase1 + as->as_npages1 * PAGE_SIZE;
@@ -376,9 +376,9 @@ as_destroy(struct addrspace *as)
 		free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[i]));
 	}*/
 
-	free_kpages(PADDR_TO_KVADDR(as->as_ptable1));
-	free_kpages(PADDR_TO_KVADDR(as->as_ptable2));
-	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable));
+	free_kpages(PADDR_TO_KVADDR(as->as_ptable1[0]));
+	free_kpages(PADDR_TO_KVADDR(as->as_ptable2[0]));
+	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[0]));
 	kfree(as);
 }
 
@@ -465,9 +465,9 @@ as_zero_region(paddr_t paddr, unsigned npages)
 int
 as_prepare_load(struct addrspace *as)
 {
-	KASSERT(as->as_pbase1 == 0);
-	KASSERT(as->as_pbase2 == 0);
-	KASSERT(as->as_stackpbase == 0);
+	KASSERT(as->as_ptable1 == NULL);
+	KASSERT(as->as_ptable2 == NULL);
+	KASSERT(as->as_pstacktable == NULL);
 
 	paddr_t pbase1 = getppages(as->as_npages1);
 	for(size_t i = 0; i < as->as_npages1; i++){
@@ -494,9 +494,9 @@ as_prepare_load(struct addrspace *as)
 		return ENOMEM;
 	}
 	
-	as_zero_region(as->as_ptable1, as->as_npages1);
-	as_zero_region(as->as_ptable2, as->as_npages2);
-	as_zero_region(as->as_pstacktable, DUMBVM_STACKPAGES);
+	as_zero_region(as->as_ptable1[0], as->as_npages1);
+	as_zero_region(as->as_ptable2[0], as->as_npages2);
+	as_zero_region(as->as_pstacktable[0], DUMBVM_STACKPAGES);
 
 	return 0;
 }
@@ -511,7 +511,7 @@ as_complete_load(struct addrspace *as)
 int
 as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t argc)
 {
-	KASSERT(as->as_stackpbase != 0);
+	KASSERT(as->as_pstacktable != NULL);
 
 	userptr_t *stack_arr = kmalloc((argc + 1) * sizeof(userptr_t));
 
