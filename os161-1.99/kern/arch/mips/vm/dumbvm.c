@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include <synch.h>
+#include <kern/synch.h>
 #include <types.h>
 #include <limits.h>
 #include <kern/errno.h>
@@ -54,7 +54,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-static struct lock * coremap_lock = NULL;
+static struct lock * coremap_lock;
 
 static struct coremap* coremap; /* Store coremap */
 
