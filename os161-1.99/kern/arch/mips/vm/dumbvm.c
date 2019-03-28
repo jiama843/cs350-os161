@@ -574,9 +574,9 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 		return ENOMEM;
 	}
 
-	KASSERT(new->as_pbase1 != 0);
-	KASSERT(new->as_pbase2 != 0);
-	KASSERT(new->as_stackpbase != 0);
+	KASSERT(new->as_ptable1 != NULL);
+	KASSERT(new->as_ptable2 != NULL);
+	KASSERT(new->as_pstacktable != NULL);
 
 	for (size_t i = 0; i < new->as_npages1; i++){
 		memmove((void *)PADDR_TO_KVADDR(new->as_ptable1[i]),
