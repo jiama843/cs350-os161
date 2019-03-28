@@ -51,14 +51,14 @@ struct addrspace {
   volatile bool done_load_elf;
   vaddr_t as_vbase1;
   //paddr_t as_pbase1;
-  paddr_t *ptable1;
+  paddr_t *as_ptable1;
   size_t as_npages1;
   vaddr_t as_vbase2;
   //paddr_t as_pbase2;
-  paddr_t *ptable2;
+  paddr_t *as_ptable2;
   size_t as_npages2;
   //paddr_t as_stackpbase;
-  paddr_t *pstacktable;
+  paddr_t *as_pstacktable;
 };
 
 /*
