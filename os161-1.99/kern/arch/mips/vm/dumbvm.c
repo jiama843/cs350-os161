@@ -53,6 +53,8 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
+static struct lock coremap_lock = lock_create("core_lock");
+
 static struct coremap* coremap; /* Store coremap */
 
 void
@@ -109,6 +111,7 @@ getppages(unsigned long npages)
 {
 	if(coremap != NULL && coremap->allocated){
 
+		lock_acquire(&coremap_lock);
 		for(int i = 0; i < coremap->total_frames; i++){
 
 			// Check if there are npage contiguous frames available
@@ -137,11 +140,13 @@ getppages(unsigned long npages)
 			}
 			kprintf("\n");
 
+			lock_release(&coremap_lock);
 			//kprintf("%d\n", (paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
 
 		kprintf("Coremap can't be allocated at this time\n");
+		lock_release(&coremap_lock);
 
 		return 0;
 	}
@@ -166,6 +171,7 @@ alloc_kpages(int npages)
 	if(coremap != NULL && coremap->allocated){
 
 		//kprintf("Coremap allocated\n");
+		lock_acquire(&coremap_lock);
 
 		for(int i = 0; i < coremap->total_frames; i++){
 
@@ -193,9 +199,13 @@ alloc_kpages(int npages)
 			//}
 			//kprintf("\n");
 
+			lock_release(&coremap_lock);
+
 			//kprintf("ADDRESS RETURNED: %d", PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE)));
 			return PADDR_TO_KVADDR((paddr_t) (coremap->firstaddr + i * PAGE_SIZE));
 		}
+
+		lock_release(&coremap_lock);
 
 		return 0; // Should return out of memory error
 	}
@@ -215,13 +225,15 @@ free_kpages(vaddr_t addr)
 	/* nothing - leak the memory. */
 	kprintf("Coremap deallocated\n");
 
+	lock_acquire(&coremap_lock);
+
 	//(void)addr;
 	int frame = ((addr - 0x80000000) - coremap->firstaddr) / PAGE_SIZE; // Translate to paddr first
 
-	//kprintf("addr: %d\n", addr);
-	//kprintf("first addr: %d\n", coremap->firstaddr);
-	//kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
-	//kprintf("Deallocating starting from frame: %d\n", frame);
+	kprintf("addr: %d\n", addr);
+	kprintf("first addr: %d\n", coremap->firstaddr);
+	kprintf("feeling a little ballsy so how about this: %d\n", addr - 0x80000000);
+	kprintf("Deallocating starting from frame: %d\n", frame);
 
 	// Clear coremap
 	int i = frame;
@@ -243,8 +255,7 @@ free_kpages(vaddr_t addr)
 	}
 	kprintf("\n");
 
-	kprintf("ADDRESS to delete: %d", addr);
-
+	lock_release(&coremap_lock);
 }
 
 void
@@ -405,6 +416,9 @@ as_create(void)
 void
 as_destroy(struct addrspace *as)
 {
+	free_kpages(PADDR_TO_KVADDR(as->as_pbase1));
+	free_kpages(PADDR_TO_KVADDR(as->as_pbase2));
+	free_kpages(PADDR_TO_KVADDR(as->as_stackpbase));
 	kfree(as);
 }
 
