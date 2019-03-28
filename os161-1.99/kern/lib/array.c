@@ -68,7 +68,7 @@ array_cleanup(struct array *a)
 	 * we don't/can't free anything any contents may be pointing
 	 * to.
 	 */
-	//ARRAYASSERT(a->num == 0);
+	ARRAYASSERT(a->num == 0);
 	kfree(a->v);
 #ifdef ARRAYS_CHECKED
 	a->v = NULL;
