@@ -54,7 +54,7 @@
  */
 static struct spinlock stealmem_lock = SPINLOCK_INITIALIZER;
 
-static struct spinlock coremap_lock = SPINLOCK_INITIALIZER;
+//static struct spinlock coremap_lock = SPINLOCK_INITIALIZER;
 //static struct lock *coremap_lock;
 
 static struct coremap* coremap; /* Store coremap */
