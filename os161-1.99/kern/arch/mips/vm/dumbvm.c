@@ -464,6 +464,16 @@ as_zero_region(paddr_t paddr, unsigned npages)
 	bzero((void *)PADDR_TO_KVADDR(paddr), npages * PAGE_SIZE);
 }*/
 
+static
+void
+alloc_ptable_frames(paddr_t* ptable, size_t num_pages){
+	for(size_t i = 0; i < num_pages; i++){
+		paddr_t ptablepage = getppages(1);
+		ptable[i] = ptablepage;
+		bzero((void *)PADDR_TO_KVADDR(ptablepage), 1 * PAGE_SIZE);
+	}
+}
+
 int
 as_prepare_load(struct addrspace *as)
 {
@@ -471,32 +481,18 @@ as_prepare_load(struct addrspace *as)
 	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_pstacktable == NULL);
 
-	//paddr_t pbase1 = getppages(as->as_npages1);
-	for(size_t i = 0; i < as->as_npages1; i++){
-		paddr_t ptable1page = getppages(1);
-		as->as_ptable1[i] = ptable1page; //pbase1 + (i * PAGE_SIZE);
-		bzero((void *)PADDR_TO_KVADDR(ptable1page), 1 * PAGE_SIZE);
-	}
+	alloc_ptable_frames(as->as_ptable1, as->as_npages1);
 	if (as->as_ptable1[0] == 0) {
 		return ENOMEM;
 	}
 
-	//paddr_t pbase2 = getppages(as->as_npages2);
-	for(size_t i = 0; i < as->as_npages2; i++){
-		paddr_t ptable2page = getppages(1);
-		as->as_ptable2[i] = ptable2page; //pbase2 + (i * PAGE_SIZE);
-		bzero((void *)PADDR_TO_KVADDR(ptable2page), 1 * PAGE_SIZE);
-	}
+	alloc_ptable_frames(as->as_ptable2, as->as_npages2);
 	if (as->as_ptable2[0] == 0) {
 		return ENOMEM;
 	}
 
 	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
-	for(size_t i = 0; i < DUMBVM_STACKPAGES; i++){
-		paddr_t stackptablepage = getppages(1);
-		as->as_pstacktable[i] = stackptablepage; //pbase2 + (i * PAGE_SIZE);
-		bzero((void *)PADDR_TO_KVADDR(stackptablepage), 1 * PAGE_SIZE);
-	}
+	alloc_ptable_frames(as->as_pstacktable, DUMBVM_STACKPAGES);
 	if (as->as_pstacktable[0] == 0) {
 		return ENOMEM;
 	}
