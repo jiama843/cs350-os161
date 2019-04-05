@@ -351,12 +351,12 @@ as_create(void)
 
 	as->done_load_elf = false;
 	as->as_vbase1 = 0;
-	as->as_ptable1 = kmalloc(sizeof(paddr_t *));
+	as->as_ptable1 = NULL;
 	as->as_npages1 = 0;
 	as->as_vbase2 = 0;
-	as->as_ptable2 = kmalloc(sizeof(paddr_t *));
+	as->as_ptable2 = NULL;
 	as->as_npages2 = 0;
-	as->as_pstacktable = kmalloc(sizeof(paddr_t *));
+	as->as_pstacktable = NULL;
 
 	return as;
 }
@@ -435,7 +435,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	if (as->as_vbase1 == 0) {
 		as->as_vbase1 = vaddr;
 		as->as_npages1 = npages;
-		as->as_ptable1 = kmalloc(sz * sizeof(paddr_t));//sizeof(paddr_t*));
+		as->as_ptable1 = kmalloc(sz);//sizeof(paddr_t*));
 		//as->as_ptable1[0] = readable;
 		return 0;
 	}
@@ -443,7 +443,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	if (as->as_vbase2 == 0) {
 		as->as_vbase2 = vaddr;
 		as->as_npages2 = npages;
-		as->as_ptable2 = kmalloc(sz * sizeof(paddr_t));//sizeof(paddr_t*));
+		as->as_ptable2 = kmalloc(sz);//sizeof(paddr_t*));
 		//as->as_ptable2[0] = writeable;
 		return 0;
 	}
@@ -465,9 +465,9 @@ as_zero_region(paddr_t paddr, unsigned npages)
 int
 as_prepare_load(struct addrspace *as)
 {
-	KASSERT(as->as_ptable1[0] == 0);
-	KASSERT(as->as_ptable2[0] == 0);
-	KASSERT(as->as_pstacktable[0] == 0);
+	KASSERT(as->as_ptable1 == NULL);
+	KASSERT(as->as_ptable2 == NULL);
+	KASSERT(as->as_pstacktable == NULL);
 
 	paddr_t pbase1 = getppages(as->as_npages1);
 	for(size_t i = 0; i < as->as_npages1; i++){
@@ -485,7 +485,7 @@ as_prepare_load(struct addrspace *as)
 		return ENOMEM;
 	}
 
-	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * sizeof(paddr_t));
+	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
 	paddr_t stackpbase = getppages(DUMBVM_STACKPAGES);
 	for(size_t i = 0; i < DUMBVM_STACKPAGES; i++){
 		as->as_pstacktable[i] = stackpbase + (i * PAGE_SIZE);
