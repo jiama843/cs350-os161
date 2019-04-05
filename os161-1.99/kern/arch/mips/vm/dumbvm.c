@@ -457,12 +457,12 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	return EUNIMP;
 }
 
-static
+/*static
 void
 as_zero_region(paddr_t paddr, unsigned npages)
 {
 	bzero((void *)PADDR_TO_KVADDR(paddr), npages * PAGE_SIZE);
-}
+}*/
 
 int
 as_prepare_load(struct addrspace *as)
@@ -475,6 +475,7 @@ as_prepare_load(struct addrspace *as)
 	for(size_t i = 0; i < as->as_npages1; i++){
 		paddr_t ptable1page = getppages(1);
 		as->as_ptable1[i] = ptable1page; //pbase1 + (i * PAGE_SIZE);
+		bzero((void *)PADDR_TO_KVADDR(ptable1page), 1 * PAGE_SIZE);
 	}
 	if (as->as_ptable1[0] == 0) {
 		return ENOMEM;
@@ -484,6 +485,7 @@ as_prepare_load(struct addrspace *as)
 	for(size_t i = 0; i < as->as_npages2; i++){
 		paddr_t ptable2page = getppages(1);
 		as->as_ptable2[i] = ptable2page; //pbase2 + (i * PAGE_SIZE);
+		bzero((void *)PADDR_TO_KVADDR(ptable2page), 1 * PAGE_SIZE);
 	}
 	if (as->as_ptable2[0] == 0) {
 		return ENOMEM;
@@ -493,6 +495,7 @@ as_prepare_load(struct addrspace *as)
 	for(size_t i = 0; i < DUMBVM_STACKPAGES; i++){
 		paddr_t stackptablepage = getppages(1);
 		as->as_pstacktable[i] = stackptablepage; //pbase2 + (i * PAGE_SIZE);
+		bzero((void *)PADDR_TO_KVADDR(stackptablepage), 1 * PAGE_SIZE);
 	}
 	if (as->as_pstacktable[0] == 0) {
 		return ENOMEM;
