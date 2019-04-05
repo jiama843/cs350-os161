@@ -270,7 +270,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	KASSERT(as->as_vbase2 != 0);
 	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_npages2 != 0);
-	//KASSERT(as->as_pstacktable != NULL);
+	KASSERT(as->as_pstacktable != NULL);
 	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
 	KASSERT((as->as_ptable1[0] & PAGE_FRAME) == as->as_ptable1[0]);
 	KASSERT((as->as_vbase2 & PAGE_FRAME) == as->as_vbase2);
@@ -436,6 +436,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 		as->as_vbase1 = vaddr;
 		as->as_npages1 = npages;
 		as->as_ptable1 = kmalloc(sz);//sizeof(paddr_t*));
+		//as->as_ptable1[0] = 0;
 		//as->as_ptable1[0] = readable;
 		return 0;
 	}
@@ -444,6 +445,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 		as->as_vbase2 = vaddr;
 		as->as_npages2 = npages;
 		as->as_ptable2 = kmalloc(sz);//sizeof(paddr_t*));
+		//as->as_ptable2[0] = 0;
 		//as->as_ptable2[0] = writeable;
 		return 0;
 	}
@@ -465,8 +467,8 @@ as_zero_region(paddr_t paddr, unsigned npages)
 int
 as_prepare_load(struct addrspace *as)
 {
-	KASSERT(as->as_ptable1 != NULL);
-	KASSERT(as->as_ptable2 != NULL);
+	KASSERT(as->as_ptable1[0] == NULL);
+	KASSERT(as->as_ptable2[0] == NULL);
 	KASSERT(as->as_pstacktable == NULL);
 
 	paddr_t pbase1 = getppages(as->as_npages1);
