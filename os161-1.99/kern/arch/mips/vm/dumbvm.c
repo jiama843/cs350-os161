@@ -364,7 +364,7 @@ as_create(void)
 void
 as_destroy(struct addrspace *as)
 {
-	/*for(size_t i = 0; i < as->as_npages1; i++){
+	for(size_t i = 0; i < as->as_npages1; i++){
 		free_kpages(PADDR_TO_KVADDR(as->as_ptable1[i]));
 	}
 
@@ -374,11 +374,11 @@ as_destroy(struct addrspace *as)
 
 	for(size_t i = 0; i < DUMBVM_STACKPAGES; i++){
 		free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[i]));
-	}*/
+	}
 
-	free_kpages(PADDR_TO_KVADDR(as->as_ptable1[0]));
+	/*free_kpages(PADDR_TO_KVADDR(as->as_ptable1[0]));
 	free_kpages(PADDR_TO_KVADDR(as->as_ptable2[0]));
-	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[0]));
+	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[0]));*/
 	kfree(as);
 }
 
@@ -467,38 +467,40 @@ as_zero_region(paddr_t paddr, unsigned npages)
 int
 as_prepare_load(struct addrspace *as)
 {
-	KASSERT(as->as_ptable1[0] == NULL);
-	KASSERT(as->as_ptable2[0] == NULL);
+	KASSERT(as->as_ptable1 != NULL);
+	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_pstacktable == NULL);
 
-	paddr_t pbase1 = getppages(as->as_npages1);
+	//paddr_t pbase1 = getppages(as->as_npages1);
 	for(size_t i = 0; i < as->as_npages1; i++){
-		as->as_ptable1[i] = pbase1 + (i * PAGE_SIZE);
+		paddr_t ptable1page = getppages(1);
+		as->as_ptable1[i] = ptable1page; //pbase1 + (i * PAGE_SIZE);
 	}
 	if (as->as_ptable1[0] == 0) {
 		return ENOMEM;
 	}
 
-	paddr_t pbase2 = getppages(as->as_npages2);
+	//paddr_t pbase2 = getppages(as->as_npages2);
 	for(size_t i = 0; i < as->as_npages2; i++){
-		as->as_ptable2[i] = pbase2 + (i * PAGE_SIZE);
+		paddr_t ptable2page = getppages(1);
+		as->as_ptable2[i] = ptable2page; //pbase2 + (i * PAGE_SIZE);
 	}
 	if (as->as_ptable2[0] == 0) {
 		return ENOMEM;
 	}
 
 	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
-	paddr_t stackpbase = getppages(DUMBVM_STACKPAGES);
 	for(size_t i = 0; i < DUMBVM_STACKPAGES; i++){
-		as->as_pstacktable[i] = stackpbase + (i * PAGE_SIZE);
+		paddr_t stackptablepage = getppages(1);
+		as->as_pstacktable[i] = stackptablepage; //pbase2 + (i * PAGE_SIZE);
 	}
 	if (as->as_pstacktable[0] == 0) {
 		return ENOMEM;
 	}
 	
-	as_zero_region(as->as_ptable1[0], as->as_npages1);
-	as_zero_region(as->as_ptable2[0], as->as_npages2);
-	as_zero_region(as->as_pstacktable[0], DUMBVM_STACKPAGES);
+	//as_zero_region(as->as_ptable1, as->as_npages1);
+	//as_zero_region(as->as_ptable2, as->as_npages2);
+	//as_zero_region(as->as_pstacktable, DUMBVM_STACKPAGES);
 
 	return 0;
 }
