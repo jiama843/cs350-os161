@@ -270,7 +270,7 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	KASSERT(as->as_vbase2 != 0);
 	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_npages2 != 0);
-	KASSERT(as->as_pstacktable != NULL);
+	//KASSERT(as->as_pstacktable != NULL);
 	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
 	KASSERT((as->as_ptable1[0] & PAGE_FRAME) == as->as_ptable1[0]);
 	KASSERT((as->as_vbase2 & PAGE_FRAME) == as->as_vbase2);
@@ -467,7 +467,7 @@ as_prepare_load(struct addrspace *as)
 {
 	KASSERT(as->as_ptable1 != NULL);
 	KASSERT(as->as_ptable2 != NULL);
-	//KASSERT(as->as_pstacktable == NULL);
+	KASSERT(as->as_pstacktable == NULL);
 
 	paddr_t pbase1 = getppages(as->as_npages1);
 	for(size_t i = 0; i < as->as_npages1; i++){
