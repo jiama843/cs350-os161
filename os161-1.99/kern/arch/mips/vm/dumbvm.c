@@ -467,9 +467,9 @@ as_zero_region(paddr_t paddr, unsigned npages)
 int
 as_prepare_load(struct addrspace *as)
 {
-	KASSERT(as->as_ptable1 != NULL);
-	KASSERT(as->as_ptable2 != NULL);
-	KASSERT(as->as_pstacktable == NULL);
+	//KASSERT(as->as_ptable1 != NULL);
+	//KASSERT(as->as_ptable2 != NULL);
+	//KASSERT(as->as_pstacktable == NULL);
 
 	//paddr_t pbase1 = getppages(as->as_npages1);
 	for(size_t i = 0; i < as->as_npages1; i++){
