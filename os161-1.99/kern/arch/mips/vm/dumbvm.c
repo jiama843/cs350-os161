@@ -567,6 +567,16 @@ as_define_stack(struct addrspace *as, vaddr_t *stackptr, char **argv, size_t arg
 	return err;
 }
 
+static
+void
+ptable_copy(paddr_t *new_pt, paddr_t *old_pt, size_t npages){
+	for (size_t i = 0; i < npages; i++){
+		memmove((void *)PADDR_TO_KVADDR(new_pt[i]),
+			(const void *)PADDR_TO_KVADDR(old_pt[i]),
+			PAGE_SIZE);
+	}
+}
+
 int
 as_copy(struct addrspace *old, struct addrspace **ret)
 {
@@ -592,23 +602,9 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 	KASSERT(new->as_ptable2 != NULL);
 	KASSERT(new->as_pstacktable != NULL);
 
-	for (size_t i = 0; i < new->as_npages1; i++){
-		memmove((void *)PADDR_TO_KVADDR(new->as_ptable1[i]),
-			(const void *)PADDR_TO_KVADDR(old->as_ptable1[i]),
-			PAGE_SIZE);
-	}
-
-	for (size_t i = 0; i < new->as_npages2; i++){
-		memmove((void *)PADDR_TO_KVADDR(new->as_ptable2[i]),
-			(const void *)PADDR_TO_KVADDR(old->as_ptable2[i]),
-			PAGE_SIZE);
-	}
-
-	for (size_t i = 0; i < DUMBVM_STACKPAGES; i++){
-		memmove((void *)PADDR_TO_KVADDR(new->as_pstacktable[i]),
-			(const void *)PADDR_TO_KVADDR(old->as_pstacktable[i]),
-			PAGE_SIZE);
-	}
+	ptable_copy(new->as_ptable1, old->as_ptable1, new->as_npages1);
+	ptable_copy(new->as_ptable2, old->as_ptable2, new->as_npages2);
+	ptable_copy(new->as_pstacktable, old->as_pstacktable, DUMBVM_STACKPAGES);
 
 	*ret = new;
 	return 0;
