@@ -480,7 +480,14 @@ alloc_ptable_frames(paddr_t* ptable, size_t num_pages){
 	for(size_t i = 0; i < num_pages; i++){
 		paddr_t ptablepage = getppages(1);
 		ptable[i] = ptablepage;
-		bzero((void *)PADDR_TO_KVADDR(ptablepage), 1 * PAGE_SIZE);
+	}
+}
+
+static
+void
+as_zero_regions(paddr_t* ptable, size_t num_pages){
+	for(size_t i = 0; i < num_pages; i++){
+		bzero((void *)PADDR_TO_KVADDR(ptable[i]), 1 * PAGE_SIZE);
 	}
 }
 
@@ -508,6 +515,9 @@ as_prepare_load(struct addrspace *as)
 		return ENOMEM;
 	}
 	
+	alloc_ptable_frames(as->as_ptable1, as->as_npages1);
+	alloc_ptable_frames(as->as_ptable2, as->as_npages2);
+	alloc_ptable_frames(as->as_pstacktable, DUMBVM_STACKPAGES);
 	//as_zero_region(as->as_ptable1, as->as_npages1);
 	//as_zero_region(as->as_ptable2, as->as_npages2);
 	//as_zero_region(as->as_pstacktable, DUMBVM_STACKPAGES);
