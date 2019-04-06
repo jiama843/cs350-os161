@@ -110,6 +110,11 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
+			for(int j = 0; j < coremap->total_frames; j++){
+				kprintf("%d", coremap->map[j]);
+			}
+			kprintf("\n");
+
 			spinlock_release(&coremap_lock);
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
 		}
@@ -479,7 +484,6 @@ as_prepare_load(struct addrspace *as)
 {
 	KASSERT(as->as_ptable1 != NULL);
 	KASSERT(as->as_ptable2 != NULL);
-	KASSERT(as->as_pstacktable == NULL);
 
 	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
 	KASSERT(as->as_pstacktable != NULL);
