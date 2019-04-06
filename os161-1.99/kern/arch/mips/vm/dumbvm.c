@@ -480,7 +480,7 @@ alloc_ptable_frames(paddr_t* ptable, size_t num_pages){
 	for(size_t i = 0; i < num_pages; i++){
 		paddr_t ptablepage = getppages(1);
 		ptable[i] = ptablepage;
-		//bzero((void *)PADDR_TO_KVADDR(ptablepage), 1 * PAGE_SIZE);
+		bzero((void *)PADDR_TO_KVADDR(ptablepage), 1 * PAGE_SIZE);
 	}
 }
 
