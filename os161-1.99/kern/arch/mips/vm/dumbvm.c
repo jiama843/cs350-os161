@@ -110,10 +110,10 @@ getppages(unsigned long npages)
 				coremap->map[i + seg_page] = seg_page + 1;
 			}
 
-			/*for(int j = 0; j < coremap->total_frames; j++){
+			for(int j = 0; j < coremap->total_frames; j++){
 				kprintf("%d", coremap->map[j]);
 			}
-			kprintf("\n");*/
+			kprintf("\n");
 
 			spinlock_release(&coremap_lock);
 			return (paddr_t) (coremap->firstaddr + i * PAGE_SIZE);
@@ -207,10 +207,10 @@ free_kpages(vaddr_t addr)
 		coremap->map[f] = 0;
 	}
 
-	/*for(int j = 0; j < coremap->total_frames; j++){
+	for(int j = 0; j < coremap->total_frames; j++){
 		kprintf("%d", coremap->map[j]);
 	}
-	kprintf("\n");*/
+	kprintf("\n");
 
 	//lock_release(coremap_lock);
 	spinlock_release(&coremap_lock);
