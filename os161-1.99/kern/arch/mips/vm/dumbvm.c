@@ -161,9 +161,9 @@ alloc_kpages(int npages)
 			}
 
 			// if can_alloc, we alloc
-			/*for(int seg_page = 0; seg_page < npages; seg_page++){
+			for(int seg_page = 0; seg_page < npages; seg_page++){
 				coremap->map[i + seg_page] = seg_page + 1;
-			}*/
+			}
 
 			spinlock_release(&coremap_lock);
 
@@ -207,10 +207,10 @@ free_kpages(vaddr_t addr)
 		coremap->map[f] = 0;
 	}
 
-	for(int j = 0; j < coremap->total_frames; j++){
+	/*for(int j = 0; j < coremap->total_frames; j++){
 		kprintf("%d ", coremap->map[j]);
 	}
-	kprintf("\n");
+	kprintf("\n");*/
 
 	//lock_release(coremap_lock);
 	spinlock_release(&coremap_lock);
