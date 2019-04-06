@@ -481,6 +481,9 @@ as_prepare_load(struct addrspace *as)
 	KASSERT(as->as_ptable2 != NULL);
 	KASSERT(as->as_pstacktable == NULL);
 
+	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
+	KASSERT(as->as_pstacktable != NULL);
+
 	alloc_ptable_frames(as->as_ptable1, as->as_npages1);
 	if (as->as_ptable1[0] == 0) {
 		return ENOMEM;
@@ -491,7 +494,6 @@ as_prepare_load(struct addrspace *as)
 		return ENOMEM;
 	}
 
-	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
 	alloc_ptable_frames(as->as_pstacktable, DUMBVM_STACKPAGES);
 	if (as->as_pstacktable[0] == 0) {
 		return ENOMEM;
