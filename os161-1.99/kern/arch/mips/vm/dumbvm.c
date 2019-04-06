@@ -386,9 +386,9 @@ as_destroy(struct addrspace *as)
 		free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[i]));
 	}
 
-	/*free_kpages(PADDR_TO_KVADDR(as->as_ptable1[0]));
-	free_kpages(PADDR_TO_KVADDR(as->as_ptable2[0]));
-	free_kpages(PADDR_TO_KVADDR(as->as_pstacktable[0]));*/
+	kfree(as->as_ptable1);
+	kfree(as->as_ptable2);
+	kfree(as->as_pstacktable);
 	kfree(as);
 }
 
