@@ -445,7 +445,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	if (as->as_vbase1 == 0) {
 		as->as_vbase1 = vaddr;
 		as->as_npages1 = npages;
-		as->as_ptable1 = kmalloc(sz);//sizeof(paddr_t*));
+		as->as_ptable1 = kmalloc(npages * sizeof(paddr_t));//sizeof(paddr_t*));
 		//as->as_ptable1[0] = 0;
 		//as->as_ptable1[0] = readable;
 		return 0;
@@ -454,7 +454,7 @@ as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
 	if (as->as_vbase2 == 0) {
 		as->as_vbase2 = vaddr;
 		as->as_npages2 = npages;
-		as->as_ptable2 = kmalloc(sz);//sizeof(paddr_t*));
+		as->as_ptable2 = kmalloc(npages * sizeof(paddr_t));//sizeof(paddr_t*));
 		//as->as_ptable2[0] = 0;
 		//as->as_ptable2[0] = writeable;
 		return 0;
@@ -497,7 +497,7 @@ as_prepare_load(struct addrspace *as)
 	KASSERT(as->as_ptable1 != NULL);
 	KASSERT(as->as_ptable2 != NULL);
 
-	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * PAGE_SIZE);
+	as->as_pstacktable = kmalloc(DUMBVM_STACKPAGES * sizeof(paddr_t));
 	KASSERT(as->as_pstacktable != NULL);
 
 	alloc_ptable_frames(as->as_ptable1, as->as_npages1);
@@ -602,8 +602,8 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 	new->as_vbase2 = old->as_vbase2;
 	new->as_npages2 = old->as_npages2;
 
-	new->as_ptable1 = kmalloc(new->as_npages1 * PAGE_SIZE);
-	new->as_ptable2 = kmalloc(new->as_npages2 * PAGE_SIZE);
+	new->as_ptable1 = kmalloc(new->as_npages1 * sizeof(paddr_t));
+	new->as_ptable2 = kmalloc(new->as_npages2 * sizeof(paddr_t));
 
 	/* (Mis)use as_prepare_load to allocate some physical memory. */
 	if (as_prepare_load(new)) {
