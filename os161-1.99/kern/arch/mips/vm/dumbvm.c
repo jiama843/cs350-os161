@@ -592,6 +592,9 @@ as_copy(struct addrspace *old, struct addrspace **ret)
 	new->as_vbase2 = old->as_vbase2;
 	new->as_npages2 = old->as_npages2;
 
+	new->as_ptable1 = kmalloc(new->as_npages1 * PAGE_SIZE);
+	new->as_ptable2 = kmalloc(new->as_npages2 * PAGE_SIZE);
+
 	/* (Mis)use as_prepare_load to allocate some physical memory. */
 	if (as_prepare_load(new)) {
 		as_destroy(new);
